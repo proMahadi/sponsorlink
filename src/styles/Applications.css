@@ -1,0 +1,146 @@
+.applications-container {
+    max-width: 1560px;
+    margin: 0 auto;
+    padding: 0 6rem;
+    padding-bottom: 1rem;
+}
+
+.applications-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0 2rem;
+    padding: 0 0 0.75rem;
+}
+
+.applications-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 1rem;
+}
+
+.application-item {
+    display: flex;
+    border-radius: 8px;
+    background-color: #fff;
+    border: solid 1px var(--color-separator);
+    padding: 0.7rem;
+}
+
+.application-item .listing-card {
+  width: 50%;
+  border: transparent;
+  box-shadow: none;
+}
+
+.application-details {
+    display: grid;
+    padding: 1.4rem;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    width: 50%;
+    border: solid 1px var(--color-separator);
+}
+
+.application-status {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.status-indicators {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  font-size: 15px;
+}
+
+.time-submitted,
+.seen-status,
+.acceptance-status,
+.file-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+}
+
+.message-section {
+  margin: 1rem 0;
+}
+
+.message-section div {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.message-section h4 {
+  margin-bottom: 0.5rem;
+}
+
+.message-section p {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 4px;
+  font-size: 14px;
+  border: solid 1px var(--color-separator);
+}
+
+.file-section {
+  padding: 0.6rem;
+  background-color: white;
+  border-radius: 4px;
+  font-size: 15px;
+  border: solid 1px var(--color-separator);
+}
+
+@media (max-width: 700px) {
+  .applications-container {
+      padding: 0.6rem 0.6rem 0 0.6rem;
+  }
+  .applications-grid {
+    margin: 0.6rem;
+    margin-top: 1rem;
+  }
+  .application-item {
+    flex-direction: column;
+  }
+  .application-item .listing-card {
+    width: auto;
+  }
+  .application-details {
+    width: auto;
+    border-radius: 8px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    padding: 1rem;
+    gap: 0.3rem;
+    padding-top: 1.5rem;
+  }
+  .message-section {
+    margin: 0;
+  }
+  .application-status {
+    margin-bottom: 0rem;
+  }
+  .status-indicators {
+    gap: 0;
+    justify-content: space-between;
+    margin: 1rem;
+  }
+  .status-indicators span {
+    font-size: 14px;
+  }
+  .status-indicators svg {
+    width: 16px;
+    height: 16px;
+  }
+  .time-submitted, .seen-status, .acceptance-status, .file-section {
+    flex-direction: column;
+    align-items: center;
+  }
+}

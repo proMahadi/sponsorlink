@@ -1,0 +1,27 @@
+#customSelect .customSelectTrigger {
+  padding: 8px;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #757575;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#customSelect .selectOptions {
+  padding: 2px 8px;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  background: white;
+  max-height: 500px;
+  overflow-y: auto;
+}
+#customSelect .selectOptions .singleOption p {
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #757575;
+  background: hwb(0 87% 13% / 0.3);
+  text-transform: capitalize;
+}

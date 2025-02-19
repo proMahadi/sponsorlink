@@ -1,0 +1,115 @@
+.user-menu {
+    position: absolute;
+    top: calc(var(--header-height-sm) - 1px);
+    right: 0;
+    padding: 8px;
+    background: rgb(255 255 255 / 100%);
+    border: 1px solid var(--color-separator);
+    z-index: 2000;
+    width: calc(100vw - 1rem);
+    font-size: 14px;
+    font-weight: 400;
+    animation: menu-in 0.15s ease-in-out;
+    box-shadow: 0px 20px 20px -7px rgba(0, 0, 0, 0.1);
+}
+.menu-divider {
+    width: calc(100% + 16px);
+    height: 1px;
+    margin: 8px 0 8px -8px;
+    border-top: 1px solid var(--color-separator);
+}
+
+.user-identity {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 8px 8px;
+    row-gap: 4px;
+}
+.user-name {
+    font-weight: 500;
+}
+.user-email {
+    color: #666666;
+}
+
+.user-menu-links {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-menu-link {
+    color: rgb(102, 102, 102);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    height: 40px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.1s ease;
+}
+
+.user-menu-link:hover {
+    color: #000000 !important;
+    background-color: #f2f2f2;
+}
+
+.user-menu-link.new-notis {
+    font-weight: 500;
+    color: #3f3f3f;
+}
+
+
+.upgrade-btn {
+    color: #fff!important;
+    font-size: 15px;
+    font-weight: 600;
+    background-color: #f16868;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 32px !important;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    text-align: center;
+    transition: all 0.1s;
+}
+
+.upgrade-btn:hover {
+    background-color: #f77f7f;
+}
+
+
+@keyframes menu-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (min-width: 700px) {
+    .user-menu {
+        z-index: 2020;
+        top: calc(var(--header-height) - 10px);
+        right: 1rem;
+        width: 256px;
+        border-radius: 6px;
+        box-shadow: 0 4px 32px 0 #0000001a;
+    }
+    @keyframes menu-in {
+        from {
+            transform: scale(0.95);
+            opacity: 0.9;
+        }
+        
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+}

@@ -1,0 +1,21 @@
+.main {
+    display: block;
+    margin-top: var(--header-height-sm);
+    transition: margin-left var(--main-menu-transition);
+    background-color: var(--color-bg-featured);
+    min-height: calc(100vh - var(--header-height-sm));
+}
+
+
+@media (min-width: 700px) {
+    .main {
+    margin-top: var(--header-height);
+    min-height: calc(100vh - var(--header-height));
+}
+}
+
+@media (min-width: 1200px) {
+.main {
+    margin-left: var(--sidebar-width);
+}
+}

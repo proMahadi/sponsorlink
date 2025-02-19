@@ -1,0 +1,37 @@
+.faq-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - (69px / 2));
+    gap: 1rem;
+    padding: 1rem;
+    position: relative;
+}
+
+h1 span {
+    color: #F77F7F;
+}
+
+.faq-group {
+    max-width: 1400px;
+}
+
+.title h3 {
+    font-size: 26px!important;
+}
+
+/* Mobile Section */
+
+@media screen and (max-width: 768px) {
+    .faq-section {
+        margin-top: 3rem;
+        justify-content: start;
+    }
+    .faq-section h1 {
+        font-size: 24px;
+    }
+    .title h3 {
+        font-size: 18px!important;
+    }
+}

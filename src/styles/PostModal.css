@@ -1,0 +1,137 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2025;
+}
+
+#geist-ui-dropdown .dropdown {
+  z-index: 5050!important;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: solid 1px var(--color-separator-dark);
+  animation: pop-in 0.15s ease-in-out;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.post-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+
+.form-group:has(.select) {
+  flex-direction: row;
+}
+
+.form-group label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.form-group .select {
+  width: 50%!important;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.post-form .title h3 {
+  font-size: 17px!important;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.cancel-button,
+.submit-button {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.cancel-button {
+  background: #f5f5f5;
+}
+
+.submit-button {
+  background: var(--color-accent);
+  color: white;
+}
+
+.submit-button:hover {
+  opacity: 0.9;
+}
+
+.cancel-button:hover {
+  background: #e5e5e5;
+}
+.post-form .collapse-group {
+  padding: 0 !important;
+}
+
+/* MEDIA QUERIES */
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 100%;
+    padding: 2rem 1.5rem;
+  }
+  .form-group:has(.select) {
+    flex-direction: column;
+  }
+  .form-group:has(.select) .select {
+    width: calc(100% - 1.5rem)!important;
+  } 
+}
