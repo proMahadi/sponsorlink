@@ -1,64 +1,57 @@
-import React from "react";
+import React, { useState } from "react";
 import "@/styles/ui/CustomSelect.css";
 import { FaAngleDown } from "react-icons/fa6";
+import { Spacer } from "@geist-ui/core";
 
-const CustomSelect = () => {
+const CustomSelect = ({
+  searchComponent,
+  formDataTags,
+  tagChoices,
+  formData,
+}) => {
+  const [showOptions, setShowOptions] = useState(false);
   return (
     <div
-      Id="customSelect"
+      id="customSelect"
       style={{
         position: "relative",
       }}
     >
-      <div className="customSelectTrigger">
-        <span>Select Tags</span>
-        <FaAngleDown />
-      </div>
-      <div className="selectOptions"
-      style={{
-        position:"absolute",
-        width:"95.5%",
-        top:"50px",
-        zIndex:999,
-      }}
+      <div
+        onClick={() => setShowOptions(!showOptions)}
+        className="customSelectTrigger"
       >
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
-        <div className="singleOption">
-            <p>choto babu</p>
-        </div>
+        <span>Select Tags</span>
+        <FaAngleDown
+          style={
+            showOptions
+              ? {
+                  rotate: "180deg",
+                  transition: "all linear 0.3s",
+                }
+              : { rotate: "0deg", transition: "all linear 0.3s" }
+          }
+        />
       </div>
+      {showOptions && (
+        <div className="selectOptions">
+          <Spacer h={0.5}></Spacer>
+          {searchComponent}
+          <div className="allOptions">
+            {formDataTags.length > 0
+              ? formData.tags.map((tag) => (
+                  <div className="singleOption">
+                    <p>{tag}</p>
+                  </div>
+                ))
+              : tagChoices.map((choice) => (
+                  <div className="singleOption">
+                    <p>{choice.label}</p>
+                  </div>
+                ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

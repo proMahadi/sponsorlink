@@ -1,3 +1,7 @@
+#customSelect {
+  position: relative;
+  z-index: 1000;
+}
 #customSelect .customSelectTrigger {
   padding: 8px;
   border: 1px solid #eaeaea;
@@ -14,14 +18,30 @@
   border: 1px solid #eaeaea;
   border-radius: 8px;
   background: white;
-  max-height: 500px;
+  height: 300px;
+  width: 300px;
   overflow-y: auto;
+  position: sticky;
+  width: 95.5%;
+  top: 50px;
+  z-index: 999;
+  margin-top: 10px;
 }
-#customSelect .selectOptions .singleOption p {
+#customSelect .selectOptions .allOptions {
+
+  height: 300px;
+  overflow-y: auto;
+
+}
+#customSelect .selectOptions .allOptions .singleOption p {
   padding: 2px 4px;
   border-radius: 4px;
   font-size: 12px;
   color: #757575;
-  background: hwb(0 87% 13% / 0.3);
   text-transform: capitalize;
+}
+#customSelect .selectOptions .allOptions .singleOption p:hover {
+
+  background: rgba(222, 222, 222, 0.3);
+  cursor: pointer;
 }

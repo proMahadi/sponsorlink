@@ -221,26 +221,26 @@ const ExploreForm = ({ onSubmit, loading }) => {
           <Collapse
             title="Tags"
             bordered
-            style={{
-              position: "relative",
-            }}
+            // style={{
+            //   position: "relative",
+            // }}
           >
             {/* <Input
               width={"100%"}
               name="tag"
               placeholder="Search Tags"
               onChange={handleTagSearch}
-            />
-            {formData.tags.length > 0  && (
+            /> */}
+            {/* {formData.tags.length > 0  && (
               <ul
                 style={{
                   background: "white",
                   padding: "12px",
-                  border: "1px solid gray",
+                  border: "1px solid #dedede",
                   position: "absolute",
                   width: "92.5%",
                   zIndex: "9999",
-                  top: "110px",
+                  top: "100px",
                   maxHeight: "300px",
                   overflowY: "auto",
                 }}
@@ -248,7 +248,7 @@ const ExploreForm = ({ onSubmit, loading }) => {
                 {formData.tags.map((tag) => (
                   // console.log(tag)
                   <li>
-                    <a   style={{ color: "black" }}>{tag}</a>
+                    <a   style={{ color: "black", padding:"12px 0px" }}>{tag}</a>
                   </li>
                 ))}
               </ul>
@@ -275,7 +275,12 @@ const ExploreForm = ({ onSubmit, loading }) => {
                     </Select.Option>
                   ))}
             </Select> */}
-            <CustomSelect/>
+            <CustomSelect searchComponent={<Input
+              width={"100%"}
+              name="tag"
+              placeholder="Search Tags"
+              onChange={handleTagSearch}
+            />} formDataTags={formData.tags} formData={formData} tagChoices={tagChoices}/>
 
             {/* <Spacer h={0.1} inline></Spacer> */}
 
