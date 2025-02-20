@@ -23,9 +23,12 @@
   margin-bottom: 2rem;
 }
 
-.auth-container form {
+.auth-container form .formInputs {
   display: flex;
   gap: 1rem;
+}
+.auth-container form .btn {
+  width: 100%;
 }
 
 .auth-container .prompt,

@@ -1,8 +1,9 @@
-import { Input, Button, Divider } from "@geist-ui/core";
+import { Input, Button, Divider, Spacer } from "@geist-ui/core";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import "@/styles/Auth.css";
 import { FcGoogle } from "react-icons/fc";
+import { useForm } from "react-hook-form"
 
 export default function Login({
   User,
@@ -51,21 +52,27 @@ export default function Login({
           <div>Find your dream collaboration here!</div>
         </header>
         <form>
-          <Input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-            width={"100%"}
-          />
-          <Input.Password
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            width={"100%"}
-          />
-        </form>
+          <div className="formInputs">
+            <div>
+              <Input
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+                width={"100%"}
+              />
+            </div>
+            <div>
+              <Input.Password
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                width={"100%"}
+              />
+            </div>
+          </div>
+          <Spacer h={0.1} inline></Spacer>
         <Button
           type="secondary-light"
           onClick={handleLogin}
@@ -73,7 +80,7 @@ export default function Login({
         >
           Log in
         </Button>
-
+        </form>
 
         <Divider> Or</Divider>
 
@@ -82,24 +89,24 @@ export default function Login({
             {error || "Not yet a member?"}
           </div>
           <div className="prompt-btns">
-          <Button
-            // style={{ width: "fit-content" }}
-            scale={0.7}
-            onClick={() => navigate("/signup")}
-            disabled={isLoading}
-          >
-            Sign up
-          </Button>
-          <Button
-          className="signin-google-btn"
-          // style={{ width: "fit-content" }}
-          onClick={handleLogin}
-          loading={isLoading}
-          disabled={isLoading}
-        >
-          <FcGoogle className="google-icon" />
-          Sign in With Google
-        </Button>
+            <Button
+              // style={{ width: "fit-content" }}
+              scale={0.7}
+              onClick={() => navigate("/signup")}
+              disabled={isLoading}
+            >
+              Sign up
+            </Button>
+            <Button
+              className="signin-google-btn"
+              // style={{ width: "fit-content" }}
+              onClick={handleLogin}
+              loading={isLoading}
+              disabled={isLoading}
+            >
+              <FcGoogle className="google-icon" />
+              Sign in With Google
+            </Button>
           </div>
         </div>
       </div>
