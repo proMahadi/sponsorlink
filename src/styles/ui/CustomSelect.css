@@ -12,6 +12,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24px;
 }
 #customSelect .selectOptions {
   padding: 2px 8px;
@@ -27,11 +28,25 @@
   z-index: 999;
   margin-top: 10px;
 }
+#customSelect .selectOptions .addTagBtn {
+  height: 30px;
+  width: 30px;
+  border-radius: 4px;
+  border: 1px solid #eaeaea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 3px;
+  background: white;
+  z-index: 99;
+  cursor: pointer;
+}
 #customSelect .selectOptions .allOptions {
-
   height: 300px;
   overflow-y: auto;
-
 }
 #customSelect .selectOptions .allOptions .singleOption p {
   padding: 2px 4px;
@@ -41,7 +56,6 @@
   text-transform: capitalize;
 }
 #customSelect .selectOptions .allOptions .singleOption p:hover {
-
   background: rgba(222, 222, 222, 0.3);
   cursor: pointer;
 }

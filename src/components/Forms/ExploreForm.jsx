@@ -20,7 +20,6 @@ import CustomSelect from "../ui/CustomSelect";
 
 const ExploreForm = ({ onSubmit, loading }) => {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [selectedTag, setSelectedTag] = useState([]);
   const [startOpen, setStartOpen] = useState(false);
   const [formData, setFormData] = useState({
     opportunity_type: "",
@@ -131,8 +130,15 @@ const ExploreForm = ({ onSubmit, loading }) => {
     onSubmit(convertedData);
   };
 
+  const [newTag, setNewTag] = useState(null);
+  const [searchTagInputValue, setSearchTagInputValue] = useState(null);
+  const [tags, setTags] = useState(tagChoices);
   const handleTagSearch = (e) => {
     const searchQuery = e.target.value.toLowerCase();
+
+   
+      setSearchTagInputValue(e.target.value)
+   
 
     const foundTag = tagChoices.filter(
       (choice) =>
@@ -142,9 +148,21 @@ const ExploreForm = ({ onSubmit, loading }) => {
 
     setFormData((prev) => ({
       ...prev,
-      tags: foundTag.map((tag) => tag.value),
+      tags: foundTag.map((tag) => tag),
     }));
   };
+  const handleAddNewTag = () => {
+    if (searchTagInputValue && !tags.some(tag => tag.value === searchTagInputValue)) {
+      const newTag = {
+        id: new Date().getTime(),
+        value: searchTagInputValue,
+        label: searchTagInputValue,
+      };
+  
+      setTags((prevTags) => [newTag, ...prevTags]); 
+    }
+  };
+  console.log(newTag)
 
   if (!isInitialized) {
     return;
@@ -275,12 +293,21 @@ const ExploreForm = ({ onSubmit, loading }) => {
                     </Select.Option>
                   ))}
             </Select> */}
-            <CustomSelect searchComponent={<Input
-              width={"100%"}
-              name="tag"
-              placeholder="Search Tags"
-              onChange={handleTagSearch}
-            />} formDataTags={formData.tags} formData={formData} tagChoices={tagChoices}/>
+            <CustomSelect
+              searchComponent={
+                <Input
+                  value={searchTagInputValue}
+                  width={"100%"}
+                  name="tag"
+                  placeholder="Search Tags"
+                  onChange={handleTagSearch}
+                />
+              }
+              formDataTags={formData.tags}
+              formData={formData}
+              tagChoices={tags}
+              handleAddNewTag={handleAddNewTag}
+            />
 
             {/* <Spacer h={0.1} inline></Spacer> */}
 
