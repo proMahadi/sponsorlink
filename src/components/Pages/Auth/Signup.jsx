@@ -4,6 +4,14 @@ import { useState } from "react";
 import "@/styles/Auth.css";
 import { FcGoogle } from "react-icons/fc";
 import { useForm } from "react-hook-form";
+import {z} from "zod"
+import {zodResolver} from "@hookform/resolvers/zod"
+
+
+const SignupSchema= z.object({
+  email:z.string().email("invalid email address").min(1,"email is required"),
+  password: z.string().min(length=8,"password length should be more then 8"),
+})
 
 export default function Signup({
   User,
@@ -27,6 +35,7 @@ export default function Signup({
       email: "",
       password: "",
     },
+    resolver:zodResolver(SignupSchema)
   });
 
   // const handleSignup = async () => {
@@ -134,7 +143,7 @@ export default function Signup({
               // value={email}
               // onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
-              {...register("email", { required: "email is required" })}
+              {...register("email")}
             />
             {errors.email && (
               <p
@@ -155,7 +164,7 @@ export default function Signup({
               // value={password}
               // onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
-              {...register("password", { required: "password is required" })}
+              {...register("password")}
             />
             {errors.password && (
               <p

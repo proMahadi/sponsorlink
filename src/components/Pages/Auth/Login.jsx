@@ -4,6 +4,14 @@ import { useState } from "react";
 import "@/styles/Auth.css";
 import { FcGoogle } from "react-icons/fc";
 import { useForm } from "react-hook-form";
+import {z} from "zod"
+import {zodResolver} from "@hookform/resolvers/zod"
+
+
+const LoginSchema= z.object({
+  email:z.string().email("invalid email address").min(1,"email is required"),
+  password: z.string().min(length=8,"password length should be more then 8"),
+})
 
 export default function Login({
   User,
@@ -22,6 +30,7 @@ export default function Login({
       email: "",
       password: "",
     },
+    resolver:zodResolver(LoginSchema)
   });
   // const [email, setEmail] = useState("");
   // const [password, setPassword] = useState("");
@@ -98,7 +107,7 @@ export default function Login({
                 // onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
                 width={"100%"}
-                {...register("email", { required: "email is required" })}
+                {...register("email")}
               />
               {errors.email && (
                 <p
@@ -118,7 +127,7 @@ export default function Login({
                 // onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 width={"100%"}
-                {...register("password", { required: "password is required" })}
+                {...register("password")}
               />
               {errors.password && (
                 <p
@@ -149,6 +158,17 @@ export default function Login({
           {/* <div style={{ color: error ? "red" : "inherit" }}>
             {error || "Not yet a member?"}
           </div> */}
+          {errors.root ? (
+            <div
+              style={{
+                color: "red",
+              }}
+            >
+              {errors.root.message}
+            </div>
+          ) : (
+            <div>Not yet a member?</div>
+          )}
           <div className="prompt-btns">
             <Button
               // style={{ width: "fit-content" }}
