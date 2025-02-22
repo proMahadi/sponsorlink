@@ -1,14 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { X } from '@geist-ui/icons';
-import { Select, Slider, Collapse } from '@geist-ui/core';
-import '../styles/PostModal.css';
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { X } from "@geist-ui/icons";
+import { Select, Slider, Collapse, Input } from "@geist-ui/core";
+import "../styles/PostModal.css";
 
-import { opportunityTypeChoices, industryChoices, tagChoices } from '@/utils/constants';
+import {
+  opportunityTypeChoices,
+  industryChoices,
+  tagChoices,
+} from "@/utils/constants";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 const formatListingsData = (data) => {
-  return data.map(user => ({
-    image: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'women' : 'men'}/${Math.floor(Math.random() * 100)}.jpg`,
+  return data.map((user) => ({
+    image: `https://randomuser.me/api/portraits/${
+      Math.random() > 0.5 ? "women" : "men"
+    }/${Math.floor(Math.random() * 100)}.jpg`,
     name: user.name,
     user_type: user.user_type,
     opportunity_type: user.opportunity_type,
@@ -21,22 +28,26 @@ const formatListingsData = (data) => {
   }));
 };
 
-
-export default function PostModal({ isOpen, onClose, onSubmit, initialData = null }) {
+export default function PostModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialData = null,
+}) {
   const modalRef = useRef();
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    opportunity_type: initialData?.opportunity_type || '',
-    industry: initialData?.industry || '',
-    description: initialData?.description || '',
+    opportunity_type: initialData?.opportunity_type || "",
+    industry: initialData?.industry || "",
+    description: initialData?.description || "",
     radius: initialData?.radius || 100,
     tags: initialData?.tags || [],
-    specializedTags: initialData?.specializedTags || []
+    specializedTags: initialData?.specializedTags || [],
   });
-  
+
   // New state for temporary slider values
   const [sliderValues, setSliderValues] = useState({
     businessSlider: initialData?.businessSlider || 50,
@@ -49,11 +60,9 @@ export default function PostModal({ isOpen, onClose, onSubmit, initialData = nul
     tagEffectSlider: initialData?.tagEffectSlider || 50,
   });
 
-
-
   useEffect(() => {
     const fetchUserData = async () => {
-      const data = JSON.parse(sessionStorage.getItem('user'));
+      const data = JSON.parse(sessionStorage.getItem("user"));
       setUserData(data);
     };
     fetchUserData();
@@ -79,29 +88,29 @@ export default function PostModal({ isOpen, onClose, onSubmit, initialData = nul
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
 
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && !isSubmitting) onClose();
+      if (e.key === "Escape" && !isSubmitting) onClose();
     };
 
-    document.addEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose, isSubmitting]);
 
   // Modified handleSliderChange to update temporary state
   const handleSliderChange = (name, value) => {
-    setSliderValues(prev => ({ ...prev, [name]: value }));
+    setSliderValues((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name, value) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   // Modify the handleSubmit function
@@ -113,7 +122,7 @@ export default function PostModal({ isOpen, onClose, onSubmit, initialData = nul
     const requestData = {
       opportunity_type: formData.opportunity_type,
       industry: formData.industry,
-      country: userData?.country || '',
+      country: userData?.country || "",
       latitude: userData?.latitude || 0,
       longitude: userData?.longitude || 0,
       businessSlider: sliderValues.businessSlider / 100,
@@ -125,33 +134,36 @@ export default function PostModal({ isOpen, onClose, onSubmit, initialData = nul
       radius: parseInt(formData.radius),
       radiusSlider: sliderValues.radiusSlider / 100,
       tagEffectSlider: sliderValues.tagEffectSlider / 100,
-      tags: formData.tags.map(tag => ({
+      tags: formData.tags.map((tag) => ({
         name: tag,
-        slider: sliderValues.tagEffectSlider / 100
+        slider: sliderValues.tagEffectSlider / 100,
       })),
-      specializedTags: formData.specializedTags.map(tag => ({
+      specializedTags: formData.specializedTags.map((tag) => ({
         name: tag,
-        slider: sliderValues.tagEffectSlider / 100
+        slider: sliderValues.tagEffectSlider / 100,
       })),
       isApply: false,
-      origin: 'post',
-      description: formData.description
+      origin: "post",
+      description: formData.description,
     };
 
     try {
       let data;
       // Only call API for new posts, not for edits
       if (!initialData) {
-        const response = await fetch('https://sponsorlink-backend.up.railway.app/api/bayes/getOrderedUsers/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestData)
-        });
+        const response = await fetch(
+          "https://sponsorlink-backend.up.railway.app/api/bayes/getOrderedUsers/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error("Network response was not ok");
         }
 
         data = await response.json();
@@ -159,26 +171,35 @@ export default function PostModal({ isOpen, onClose, onSubmit, initialData = nul
         // console.log('Formatted data:', formatListingsData(data));
         // Store the data in localStorage
         const formattedListings = formatListingsData(data);
-        localStorage.setItem('exploreListings', JSON.stringify(formattedListings));
-        sessionStorage.setItem('hasExplored', 'true');
+        localStorage.setItem(
+          "exploreListings",
+          JSON.stringify(formattedListings)
+        );
+        sessionStorage.setItem("hasExplored", "true");
       }
-      
+
       // Create the post object
       const newPost = {
         id: initialData?.id || crypto.randomUUID(),
-        name: userData?.name || 'Anonymous',
-        image: userData?.profile_image || '/default_profile_image.jpg',
-        opportunity_type: formData?.opportunity_type || initialData?.opportunity_type || '',
-        industry: formData?.industry || initialData?.industry || '',
-        country: userData?.country || '',
+        name: userData?.name || "Anonymous",
+        image: userData?.profile_image || "/default_profile_image.jpg",
+        opportunity_type:
+          formData?.opportunity_type || initialData?.opportunity_type || "",
+        industry: formData?.industry || initialData?.industry || "",
+        country: userData?.country || "",
         radius: formData?.radius || initialData?.radius || 100,
-        score: Math.round((sliderValues.opportunityTypeSlider + sliderValues.industrySlider) / 2),
-        description: formData?.description || initialData?.description || '',
-        labels: [...formData?.tags || initialData?.labels[0] || '', ...formData?.specializedTags || initialData?.labels[1] || ''],
+        score: Math.round(
+          (sliderValues.opportunityTypeSlider + sliderValues.industrySlider) / 2
+        ),
+        description: formData?.description || initialData?.description || "",
+        labels: [
+          ...(formData?.tags || initialData?.labels[0] || ""),
+          ...(formData?.specializedTags || initialData?.labels[1] || ""),
+        ],
         timestamp: initialData?.timestamp || new Date().toISOString(),
         views: initialData?.views || 0,
         applications: initialData?.applications || [],
-        engagementRate: initialData?.engagementRate || '0%',
+        engagementRate: initialData?.engagementRate || "0%",
 
         businessSlider: sliderValues.businessSlider / 100,
         influencerSlider: sliderValues.influencerSlider / 100,
@@ -191,75 +212,127 @@ export default function PostModal({ isOpen, onClose, onSubmit, initialData = nul
         latitude: userData?.latitude || 0,
         longitude: userData?.longitude || 0,
         isApply: false,
-        origin: 'post'
+        origin: "post",
       };
 
       onSubmit(newPost);
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     } finally {
       setIsSubmitting(false);
       if (!initialData) {
-        navigate('/explore');
+        navigate("/explore");
       }
+    }
+  };
+
+  const [newTag, setNewTag] = useState(null);
+  const [searchTagInputValue, setSearchTagInputValue] = useState(null);
+  const [tags, setTags] = useState(tagChoices);
+  const handleTagSearch = (e) => {
+    const searchQuery = e.target.value.toLowerCase();
+
+    setSearchTagInputValue(e.target.value);
+
+    const foundTag = tagChoices.filter(
+      (choice) =>
+        choice.value.toLowerCase().includes(searchQuery) ||
+        choice.label.toLowerCase().includes(searchQuery)
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      tags: foundTag.map((tag) => tag),
+    }));
+  };
+  const handleAddNewTag = () => {
+    if (
+      searchTagInputValue &&
+      !tags.some((tag) => tag.value === searchTagInputValue)
+    ) {
+      const newTag = {
+        id: new Date().getTime(),
+        value: searchTagInputValue,
+        label: searchTagInputValue,
+      };
+
+      setTags((prevTags) => [newTag, ...prevTags]);
     }
   };
 
   if (!isOpen || !isDataLoaded) return null;
   return (
     <div className="modal-overlay" onClick={(e) => !isSubmitting && onClose()}>
-      <div className="modal-content" onClick={e => e.stopPropagation()} ref={modalRef}>
+      <div
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()}
+        ref={modalRef}
+      >
         <div className="modal-header">
-          <h2>{initialData ? 'Edit Post' : 'Create New Post'}</h2>
-          <button className="close-button" onClick={onClose} disabled={isSubmitting}><X size={20} /></button>
+          <h2>{initialData ? "Edit Post" : "Create New Post"}</h2>
+          <button
+            className="close-button"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            <X size={20} />
+          </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="post-form">
           <Collapse.Group accordion={true}>
+            <div className="form-group">
+              <Select
+                placeholder="Select Opportunity Type"
+                initialValue={initialData?.opportunity_type || ""}
+                onChange={(value) =>
+                  handleSelectChange("opportunity_type", value)
+                }
+              >
+                {opportunityTypeChoices.map((choice) => (
+                  <Select.Option key={choice.value} value={choice.value}>
+                    {choice.label}
+                  </Select.Option>
+                ))}
+              </Select>
 
-              <div className="form-group">
-                  <Select 
-                    placeholder="Select Opportunity Type"
-                    initialValue={initialData?.opportunity_type || ''}
-                    onChange={(value) => handleSelectChange('opportunity_type', value)}
-                  >
-                    {opportunityTypeChoices.map(choice => (
-                      <Select.Option key={choice.value} value={choice.value}>
-                        {choice.label}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                
-                  <Select 
-                    placeholder="Select Industry"
-                    initialValue={initialData?.industry || ''}
-                    onChange={(value) => handleSelectChange('industry', value)}
-                  >
-                    {industryChoices.map(choice => (
-                      <Select.Option key={choice.value} value={choice.value}>
-                        {choice.label}
-                      </Select.Option>
-                    ))}
-                  </Select>
-              </div>
+              <Select
+                placeholder="Select Industry"
+                initialValue={initialData?.industry || ""}
+                onChange={(value) => handleSelectChange("industry", value)}
+              >
+                {industryChoices.map((choice) => (
+                  <Select.Option key={choice.value} value={choice.value}>
+                    {choice.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
 
-              <div className="form-group">
-                <label>Opportunity Type Impact</label>
-                <Slider initialValue={initialData?.opportunityTypeSlider * 100 || 50}
-                        onChange={(val) => handleSliderChange('opportunityTypeSlider', val)} />
-              </div>
+            <div className="form-group">
+              <label>Opportunity Type Impact</label>
+              <Slider
+                min={50}
+                initialValue={initialData?.opportunityTypeSlider * 100 || 50}
+                onChange={(val) =>
+                  handleSliderChange("opportunityTypeSlider", val)
+                }
+              />
+            </div>
 
-              <div className="form-group">
-                <label>Industry Impact</label>
-                <Slider initialValue={initialData?.industrySlider * 100 || 50} 
-                        onChange={(val) => handleSliderChange('industrySlider', val)} />
-              </div>
-
+            <div className="form-group">
+              <label>Industry Impact</label>
+              <Slider
+                min={50}
+                initialValue={initialData?.industrySlider * 100 || 50}
+                onChange={(val) => handleSliderChange("industrySlider", val)}
+              />
+            </div>
 
             {/* Tags Group */}
             <Collapse title="Tags" bordered>
               <div className="form-group">
-                <Select multiple 
+                {/* <Select multiple 
                   initialValue={initialData?.labels[0] || []}
                   scale={0.9}
                   placeholder="Select Tags"
@@ -282,13 +355,31 @@ export default function PostModal({ isOpen, onClose, onSubmit, initialData = nul
                       {choice.label}
                     </Select.Option>
                   ))}
-                </Select>
+                </Select> */}
+                <CustomSelect
+                  searchComponent={
+                    <Input
+                      value={searchTagInputValue}
+                      width={"100%"}
+                      name="tag"
+                      placeholder="Search Tags"
+                      onChange={handleTagSearch}
+                    />
+                  }
+                  formDataTags={formData.tags}
+                  formData={formData}
+                  tagChoices={tags}
+                  handleAddNewTag={handleAddNewTag}
+                />
               </div>
 
               <div className="form-group">
                 <label>Tag Effect</label>
-                <Slider initialValue={initialData?.tagEffectSlider * 100 || 50} 
-                        onChange={(val) => handleSliderChange('tagEffectSlider', val)} />
+                <Slider
+                  min={50}
+                  initialValue={initialData?.tagEffectSlider * 100 || 50}
+                  onChange={(val) => handleSliderChange("tagEffectSlider", val)}
+                />
               </div>
             </Collapse>
 
@@ -299,20 +390,26 @@ export default function PostModal({ isOpen, onClose, onSubmit, initialData = nul
                 <input
                   type="number"
                   defaultValue={initialData?.radius || 100}
-                  onChange={(e) => handleSelectChange('radius', e.target.value)}
+                  onChange={(e) => handleSelectChange("radius", e.target.value)}
                 />
               </div>
 
               <div className="form-group">
                 <label>Radius Impact</label>
-                <Slider initialValue={initialData?.radiusSlider * 100 || 50} 
-                        onChange={(val) => handleSliderChange('radiusSlider', val)} />
+                <Slider
+                min={50}
+                  initialValue={initialData?.radiusSlider * 100 || 50}
+                  onChange={(val) => handleSliderChange("radiusSlider", val)}
+                />
               </div>
 
               <div className="form-group">
                 <label>Country Impact</label>
-                <Slider initialValue={initialData?.countrySlider * 100 || 50} 
-                        onChange={(val) => handleSliderChange('countrySlider', val)} />
+                <Slider
+                min={50}
+                  initialValue={initialData?.countrySlider * 100 || 50}
+                  onChange={(val) => handleSliderChange("countrySlider", val)}
+                />
               </div>
             </Collapse>
 
@@ -320,20 +417,33 @@ export default function PostModal({ isOpen, onClose, onSubmit, initialData = nul
             <Collapse title="User Type" bordered>
               <div className="form-group">
                 <label>Business Impact</label>
-                <Slider initialValue={initialData?.businessSlider * 100 || 50} 
-                        onChange={(val) => handleSliderChange('businessSlider', val)} />
+                <Slider
+                min={50}
+                  initialValue={initialData?.businessSlider * 100 || 50}
+                  onChange={(val) => handleSliderChange("businessSlider", val)}
+                />
               </div>
 
               <div className="form-group">
                 <label>Influencer Impact</label>
-                <Slider initialValue={initialData?.influencerSlider * 100 || 50} 
-                        onChange={(val) => handleSliderChange('influencerSlider', val)} />
+                <Slider
+                min={50}
+                  initialValue={initialData?.influencerSlider * 100 || 50}
+                  onChange={(val) =>
+                    handleSliderChange("influencerSlider", val)
+                  }
+                />
               </div>
 
               <div className="form-group">
                 <label>Individual Impact</label>
-                <Slider initialValue={initialData?.individualSlider * 100 || 50} 
-                        onChange={(val) => handleSliderChange('individualSlider', val)} />
+                <Slider
+                min={50}
+                  initialValue={initialData?.individualSlider * 100 || 50}
+                  onChange={(val) =>
+                    handleSliderChange("individualSlider", val)
+                  }
+                />
               </div>
             </Collapse>
           </Collapse.Group>
@@ -342,15 +452,33 @@ export default function PostModal({ isOpen, onClose, onSubmit, initialData = nul
             <label>Description</label>
             <textarea
               defaultValue={initialData?.description}
-              onChange={(e) => handleSelectChange('description', e.target.value)}
+              onChange={(e) =>
+                handleSelectChange("description", e.target.value)
+              }
               required
             />
           </div>
 
           <div className="modal-actions">
-            <button type="button" onClick={onClose} className="cancel-button" disabled={isSubmitting}>Cancel</button>
-            <button type="submit" className="submit-button" disabled={isSubmitting}>
-              {isSubmitting ? 'Loading...' : initialData ? 'Save Changes' : 'Create Post'}            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="cancel-button"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={isSubmitting}
+            >
+              {isSubmitting
+                ? "Loading..."
+                : initialData
+                ? "Save Changes"
+                : "Create Post"}{" "}
+            </button>
           </div>
         </form>
       </div>
