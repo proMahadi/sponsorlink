@@ -17,6 +17,16 @@ import {
 } from "@/utils/constants";
 import { useRef } from "react";
 import CustomSelect from "../ui/CustomSelect";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const ExploreFormSchema = z.object({
+  opportunity_type: z.string().min(1, "opportunity type is required"),
+  industry: z.string().min(1, "industry selection is required"),
+  radius: z.string().min(1, "radius selection is required"),
+  tags: z.array().min(1, "radius selection is required"),
+});
 
 const ExploreForm = ({ onSubmit, loading }) => {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -26,7 +36,23 @@ const ExploreForm = ({ onSubmit, loading }) => {
     industry: "",
     radius: 100,
     tags: [],
-    specializedTags: [],
+  });
+
+  const {
+    register,
+    control,
+    formState: { errors, isLoading, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      opportunity_type: "",
+      industry: "",
+      radius: 100,
+      tags: [],
+    },
+  });
+  const { fields } = useFieldArray({
+    control,
+    name: "tags",
   });
 
   // Separate slider state for better performance
@@ -73,14 +99,16 @@ const ExploreForm = ({ onSubmit, loading }) => {
 
       setSliderValues((prevSliders) => ({
         ...prevSliders,
-        businessSlider: parsedSearch.businessSlider * 100 || 50,
-        influencerSlider: parsedSearch.influencerSlider * 100 || 50,
-        individualSlider: parsedSearch.individualSlider * 100 || 50,
-        opportunityTypeSlider: parsedSearch.opportunityTypeSlider * 100 || 50,
-        industrySlider: parsedSearch.industrySlider * 100 || 50,
-        countrySlider: parsedSearch.countrySlider * 100 || 50,
-        radiusSlider: parsedSearch.radiusSlider * 100 || 50,
-        tagEffectSlider: parsedSearch.tagEffectSlider * 100 || 50,
+        businessSlider: Math.round(parsedSearch.businessSlider * 100 || 50),
+        influencerSlider: Math.round(parsedSearch.influencerSlider * 100 || 50),
+        individualSlider: Math.round(parsedSearch.individualSlider * 100 || 50),
+        opportunityTypeSlider: Math.round(
+          parsedSearch.opportunityTypeSlider * 100 || 50
+        ),
+        industrySlider: Math.round(parsedSearch.industrySlider * 100 || 50),
+        countrySlider: Math.round(parsedSearch.countrySlider * 100 || 50),
+        radiusSlider: Math.round(parsedSearch.radiusSlider * 100 || 50),
+        tagEffectSlider: Math.round(parsedSearch.tagEffectSlider * 100 || 50),
       }));
     }
     setIsInitialized(true);
@@ -111,14 +139,16 @@ const ExploreForm = ({ onSubmit, loading }) => {
     const convertedData = {
       ...formData,
       ...sliderValues,
-      businessSlider: sliderValues.businessSlider / 100,
-      influencerSlider: sliderValues.influencerSlider / 100,
-      individualSlider: sliderValues.individualSlider / 100,
-      opportunityTypeSlider: sliderValues.opportunityTypeSlider / 100,
-      industrySlider: sliderValues.industrySlider / 100,
-      countrySlider: sliderValues.countrySlider / 100,
-      radiusSlider: sliderValues.radiusSlider / 100,
-      tagEffectSlider: sliderValues.tagEffectSlider / 100,
+      businessSlider: Math.round(sliderValues.businessSlider / 100),
+      influencerSlider: Math.round(sliderValues.influencerSlider / 100),
+      individualSlider: Math.round(sliderValues.individualSlider / 100),
+      opportunityTypeSlider: Math.round(
+        sliderValues.opportunityTypeSlider / 100
+      ),
+      industrySlider: Math.round(sliderValues.industrySlider / 100),
+      countrySlider: Math.round(sliderValues.countrySlider / 100),
+      radiusSlider: Math.round(sliderValues.radiusSlider / 100),
+      tagEffectSlider: Math.round(sliderValues.tagEffectSlider / 100),
       country: userLocation.country,
       latitude: userLocation.latitude,
       longitude: userLocation.longitude,
@@ -133,12 +163,11 @@ const ExploreForm = ({ onSubmit, loading }) => {
   const [newTag, setNewTag] = useState(null);
   const [searchTagInputValue, setSearchTagInputValue] = useState(null);
   const [tags, setTags] = useState(tagChoices);
+  const [isSearchedTagFound,setIsSearchedTagFound]=useState(false)
   const handleTagSearch = (e) => {
     const searchQuery = e.target.value.toLowerCase();
 
-   
-      setSearchTagInputValue(e.target.value)
-   
+    setSearchTagInputValue(e.target.value);
 
     const foundTag = tagChoices.filter(
       (choice) =>
@@ -146,110 +175,122 @@ const ExploreForm = ({ onSubmit, loading }) => {
         choice.label.toLowerCase().includes(searchQuery)
     );
 
-    setFormData((prev) => ({
-      ...prev,
-      tags: foundTag.map((tag) => tag),
-    }));
+    if (foundTag.length < 1 && e.target.value.trim() !== "") {
+      setIsSearchedTagFound(true);
+  }else{
+    setIsSearchedTagFound(false)
+  }
+    
+      setFormData((prev) => ({
+        ...prev,
+        tags: foundTag.map((tag) => tag),
+      }));
   };
   const handleAddNewTag = () => {
-    if (searchTagInputValue && !tags.some(tag => tag.value === searchTagInputValue)) {
+    if (
+      searchTagInputValue &&
+      !tags.some((tag) => tag.value === searchTagInputValue)
+    ) {
       const newTag = {
         id: new Date().getTime(),
         value: searchTagInputValue,
         label: searchTagInputValue,
       };
-  
-      setTags((prevTags) => [newTag, ...prevTags]); 
+
+      setTags((prevTags) => [newTag, ...prevTags]);
     }
   };
-  console.log(newTag)
+  console.log(newTag);
 
   if (!isInitialized) {
     return;
   }
 
   return (
-    <Card className="prevent-select">
-      <Text h3 style={{ fontWeight: "600", textAlign: "center" }}>
-        Find a Match
-      </Text>
-      <form onSubmit={handleSubmit} className="explore-form">
-        <Collapse.Group accordion={true}>
-          <Collapse title="Search Category" initialVisible={false}>
-            <Select
-              name="opportunity_type"
-              initialValue={formData.opportunity_type}
-              onChange={(value) =>
-                handleSelectChange("opportunity_type", value)
-              }
-              placeholder="Select Opportunity Type"
+    <>
+      <Card className="prevent-select" >
+        <Text h3 style={{ fontWeight: "600", textAlign: "center" }}>
+          Find a Match
+        </Text>
+        <form onSubmit={handleSubmit} className="explore-form">
+          <Collapse.Group accordion={true}>
+            <Collapse title="Search Category" initialVisible={false}>
+              <Select
+                // name="opportunity_type"
+                // initialValue={formData.opportunity_type}
+                // onChange={(value) =>
+                //   handleSelectChange("opportunity_type", value)
+                // }
+                {...register("opportunity_type")}
+                placeholder="Select Opportunity Type"
+              >
+                {opportunityTypeChoices.map((choice) => (
+                  <Select.Option key={choice.value} value={choice.value}>
+                    {choice.label}
+                  </Select.Option>
+                ))}
+              </Select>
+
+              <Spacer h={0.1} inline></Spacer>
+
+              <Select
+                // name="industry"
+                // initialValue={formData.industry}
+                // onChange={(value) => handleSelectChange("industry", value)}
+                placeholder="Select Industry"
+                {...register("industry")}
+              >
+                {industryChoices.map((choice) => (
+                  <Select.Option key={choice.value} value={choice.value}>
+                    {choice.label}
+                  </Select.Option>
+                ))}
+              </Select>
+
+              <br />
+              <Spacer h={0.1} inline></Spacer>
+
+              <div>
+                <label>Opportunity Type Slider</label>
+                <Slider
+                  min={minSliderValue}
+                  max={maxSliderValue}
+                  initialValue={sliderValues.opportunityTypeSlider}
+                  onChange={(value) =>
+                    handleSliderChange("opportunityTypeSlider", value)
+                  }
+                />
+              </div>
+
+              <Spacer h={0.1} inline></Spacer>
+
+              <div>
+                <label>Industry Slider</label>
+                <Slider
+                  min={minSliderValue}
+                  max={maxSliderValue}
+                  initialValue={sliderValues.industrySlider}
+                  onChange={(value) =>
+                    handleSliderChange("industrySlider", value)
+                  }
+                />
+              </div>
+            </Collapse>
+
+            <Collapse
+              title="Tags"
+              bordered
+              // style={{
+              //   position: "relative",
+              // }}
             >
-              {opportunityTypeChoices.map((choice) => (
-                <Select.Option key={choice.value} value={choice.value}>
-                  {choice.label}
-                </Select.Option>
-              ))}
-            </Select>
-
-            <Spacer h={0.1} inline></Spacer>
-
-            <Select
-              name="industry"
-              initialValue={formData.industry}
-              onChange={(value) => handleSelectChange("industry", value)}
-              placeholder="Select Industry"
-            >
-              {industryChoices.map((choice) => (
-                <Select.Option key={choice.value} value={choice.value}>
-                  {choice.label}
-                </Select.Option>
-              ))}
-            </Select>
-
-            <br />
-            <Spacer h={0.1} inline></Spacer>
-
-            <div>
-              <label>Opportunity Type Slider</label>
-              <Slider
-                min={minSliderValue}
-                max={maxSliderValue}
-                initialValue={sliderValues.opportunityTypeSlider}
-                onChange={(value) =>
-                  handleSliderChange("opportunityTypeSlider", value)
-                }
-              />
-            </div>
-
-            <Spacer h={0.1} inline></Spacer>
-
-            <div>
-              <label>Industry Slider</label>
-              <Slider
-                min={minSliderValue}
-                max={maxSliderValue}
-                initialValue={sliderValues.industrySlider}
-                onChange={(value) =>
-                  handleSliderChange("industrySlider", value)
-                }
-              />
-            </div>
-          </Collapse>
-
-          <Collapse
-            title="Tags"
-            bordered
-            // style={{
-            //   position: "relative",
-            // }}
-          >
-            {/* <Input
+              {/* <Input
               width={"100%"}
               name="tag"
               placeholder="Search Tags"
               onChange={handleTagSearch}
             /> */}
-            {/* {formData.tags.length > 0  && (
+              {/* {formData.tags.length > 0  && (
               <ul
                 style={{
                   background: "white",
@@ -271,8 +312,8 @@ const ExploreForm = ({ onSubmit, loading }) => {
                 ))}
               </ul>
             )} */}
-            {/* <Spacer h={0.5}></Spacer> */}
-            {/* <Select
+              {/* <Spacer h={0.5}></Spacer> */}
+              {/* <Select
               width={"95%"}
               name="tags"
               // initialValue={formData.tags}
@@ -293,25 +334,26 @@ const ExploreForm = ({ onSubmit, loading }) => {
                     </Select.Option>
                   ))}
             </Select> */}
-            <CustomSelect
-              searchComponent={
-                <Input
-                  value={searchTagInputValue}
-                  width={"100%"}
-                  name="tag"
-                  placeholder="Search Tags"
-                  onChange={handleTagSearch}
-                />
-              }
-              formDataTags={formData.tags}
-              formData={formData}
-              tagChoices={tags}
-              handleAddNewTag={handleAddNewTag}
-            />
+              <CustomSelect
+                searchComponent={
+                  <Input
+                    value={searchTagInputValue}
+                    width={"100%"}
+                    name="tag"
+                    placeholder="Search Tags"
+                    onChange={handleTagSearch}
+                  />
+                }
+                formDataTags={formData.tags}
+                formData={formData}
+                tagChoices={tags}
+                handleAddNewTag={handleAddNewTag}
+                isSearchedTagFound={isSearchedTagFound}
+              />
 
-            {/* <Spacer h={0.1} inline></Spacer> */}
+              {/* <Spacer h={0.1} inline></Spacer> */}
 
-            {/* <Select name="specializedTags" initialValue={formData.specializedTags} onChange={(value) => handleSelectChange('specializedTags', value)} placeholder="Select Specialized Tags" multiple scale={0.8}>
+              {/* <Select name="specializedTags" initialValue={formData.specializedTags} onChange={(value) => handleSelectChange('specializedTags', value)} placeholder="Select Specialized Tags" multiple scale={0.8}>
               {tagChoices.map((choice) => (
                 <Select.Option key={choice.value} value={choice.value}>
                   {choice.label}
@@ -319,104 +361,110 @@ const ExploreForm = ({ onSubmit, loading }) => {
               ))}
             </Select> */}
 
-            <br />
-            <Spacer h={1}></Spacer>
+              <br />
+              <Spacer h={1}></Spacer>
 
-            <div>
-              <label>Tag Effect Slider</label>
-              <Slider
-                min={minSliderValue}
-                max={maxSliderValue}
-                initialValue={sliderValues.tagEffectSlider}
-                onChange={(value) =>
-                  handleSliderChange("tagEffectSlider", value)
-                }
-              />
-            </div>
-          </Collapse>
+              <div>
+                <label>Tag Effect Slider</label>
+                <Slider
+                  min={minSliderValue}
+                  max={maxSliderValue}
+                  initialValue={sliderValues.tagEffectSlider}
+                  onChange={(value) =>
+                    handleSliderChange("tagEffectSlider", value)
+                  }
+                />
+              </div>
+            </Collapse>
 
-          <Collapse title="Distance" bordered>
-            <Input
-              name="radius"
-              initialValue={formData.radius}
-              htmlType="number"
-              onChange={handleChange}
-              placeholder="Radius"
-            />
-            <br />
-            <Spacer h={1}></Spacer>
-            <div>
-              <label>Radius Slider</label>
-              <Slider
-                min={minSliderValue}
-                max={maxSliderValue}
-                initialValue={sliderValues.radiusSlider}
-                onChange={(value) => handleSliderChange("radiusSlider", value)}
+            <Collapse title="Distance" bordered>
+              <Input
+                name="radius"
+                initialValue={formData.radius}
+                htmlType="number"
+                // onChange={handleChange}
+                placeholder="Radius"
+                {...register("radius")}
               />
-            </div>
-            <Spacer h={1} inline></Spacer>
-            <div>
-              <label>Country Slider</label>
-              <Slider
-                min={minSliderValue}
-                max={maxSliderValue}
-                initialValue={sliderValues.countrySlider}
-                onChange={(value) => handleSliderChange("countrySlider", value)}
-              />
-            </div>
-          </Collapse>
+              <br />
+              <Spacer h={1}></Spacer>
+              <div>
+                <label>Radius Slider</label>
+                <Slider
+                  min={minSliderValue}
+                  max={maxSliderValue}
+                  initialValue={sliderValues.radiusSlider}
+                  onChange={(value) =>
+                    handleSliderChange("radiusSlider", value)
+                  }
+                />
+              </div>
+              <Spacer h={1} inline></Spacer>
+              <div>
+                <label>Country Slider</label>
+                <Slider
+                  min={minSliderValue}
+                  max={maxSliderValue}
+                  initialValue={sliderValues.countrySlider}
+                  onChange={(value) =>
+                    handleSliderChange("countrySlider", value)
+                  }
+                />
+              </div>
+            </Collapse>
 
-          <Collapse title="User type" bordered>
-            <div>
-              <label>Business Slider</label>
-              <Slider
-                min={minSliderValue}
-                max={maxSliderValue}
-                initialValue={sliderValues.businessSlider}
-                onChange={(value) =>
-                  handleSliderChange("businessSlider", value)
-                }
-              />
-            </div>
-            <Spacer h={0.1} inline></Spacer>
-            <div>
-              <label>Influencer Slider</label>
-              <Slider
-                min={minSliderValue}
-                max={maxSliderValue}
-                initialValue={sliderValues.influencerSlider}
-                onChange={(value) =>
-                  handleSliderChange("influencerSlider", value)
-                }
-              />
-            </div>
-            <Spacer h={0.1} inline></Spacer>
-            <div>
-              <label>Individual Slider</label>
-              <Slider
-                min={minSliderValue}
-                max={maxSliderValue}
-                initialValue={sliderValues.individualSlider}
-                onChange={(value) =>
-                  handleSliderChange("individualSlider", value)
-                }
-              />
-            </div>
-          </Collapse>
-        </Collapse.Group>
+            <Collapse title="User type" bordered>
+              <div>
+                <label>Business Slider</label>
+                <Slider
+                  min={minSliderValue}
+                  max={maxSliderValue}
+                  initialValue={sliderValues.businessSlider}
+                  onChange={(value) =>
+                    handleSliderChange("businessSlider", value)
+                  }
+                />
+              </div>
+              <Spacer h={0.1} inline></Spacer>
+              <div>
+                <label>Influencer Slider</label>
+                <Slider
+                  min={minSliderValue}
+                  max={maxSliderValue}
+                  initialValue={sliderValues.influencerSlider}
+                  onChange={(value) =>
+                    handleSliderChange("influencerSlider", value)
+                  }
+                />
+              </div>
+              <Spacer h={0.1} inline></Spacer>
+              <div>
+                <label>Individual Slider</label>
+                <Slider
+                  min={minSliderValue}
+                  max={maxSliderValue}
+                  initialValue={sliderValues.individualSlider}
+                  onChange={(value) =>
+                    handleSliderChange("individualSlider", value)
+                  }
+                />
+              </div>
+            </Collapse>
+          </Collapse.Group>
 
-        <Button
-          color="red"
-          ghost
-          type="success"
-          htmlType="submit"
-          loading={loading}
-          scale={0.85}
-        >
-          Explore
-        </Button>
-      </form>
-    </Card>
+          <Button
+            color="red"
+            ghost
+            type="success"
+            htmlType="submit"
+            loading={loading}
+            scale={0.85}
+          >
+            Explore
+          </Button>
+        </form>
+      </Card>
+    </>
   );
 };
 

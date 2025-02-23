@@ -3,6 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { X } from "@geist-ui/icons";
 import { Select, Slider, Collapse, Input } from "@geist-ui/core";
 import "../styles/PostModal.css";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const ExploreFormSchema = z.object({
+  opportunity_type: z.string().min(1, "opportunity type is required"),
+  industry: z.string().min(1, "industry selection is required"),
+  radius: z.string().min(1, "radius selection is required"),
+  tags: z.array().min(1, "radius selection is required"),
+});
+
 
 import {
   opportunityTypeChoices,
@@ -34,11 +45,13 @@ export default function PostModal({
   onSubmit,
   initialData = null,
 }) {
+  const minSliderValue = 50;
+  const maxSliderValue = 100;
   const modalRef = useRef();
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     opportunity_type: initialData?.opportunity_type || "",
     industry: initialData?.industry || "",
@@ -47,6 +60,22 @@ export default function PostModal({
     tags: initialData?.tags || [],
     specializedTags: initialData?.specializedTags || [],
   });
+    const {
+      register,
+      control,
+      formState: { errors, isLoading,isSubmitting},
+    } = useForm({
+      defaultValues: {
+        opportunity_type: "",
+        industry: "",
+        radius: 100,
+        tags: [],
+      },
+    });
+    const {fields}=useFieldArray({
+      control,
+      name:"tags"
+    })
 
   // New state for temporary slider values
   const [sliderValues, setSliderValues] = useState({
@@ -116,7 +145,7 @@ export default function PostModal({
   // Modify the handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    // setIsSubmitting(true);
 
     // Prepare the data in the required format
     const requestData = {
@@ -219,7 +248,7 @@ export default function PostModal({
     } catch (error) {
       console.error("Error:", error);
     } finally {
-      setIsSubmitting(false);
+      // setIsSubmitting(false);
       if (!initialData) {
         navigate("/explore");
       }
@@ -285,9 +314,10 @@ export default function PostModal({
               <Select
                 placeholder="Select Opportunity Type"
                 initialValue={initialData?.opportunity_type || ""}
-                onChange={(value) =>
-                  handleSelectChange("opportunity_type", value)
-                }
+                // onChange={(value) =>
+                //   handleSelectChange("opportunity_type", value)
+                // }
+                {...register("opportunity_type")}
               >
                 {opportunityTypeChoices.map((choice) => (
                   <Select.Option key={choice.value} value={choice.value}>
@@ -299,7 +329,8 @@ export default function PostModal({
               <Select
                 placeholder="Select Industry"
                 initialValue={initialData?.industry || ""}
-                onChange={(value) => handleSelectChange("industry", value)}
+                // onChange={(value) => handleSelectChange("industry", value)}
+                {...register("industry")}
               >
                 {industryChoices.map((choice) => (
                   <Select.Option key={choice.value} value={choice.value}>
@@ -312,7 +343,8 @@ export default function PostModal({
             <div className="form-group">
               <label>Opportunity Type Impact</label>
               <Slider
-                min={50}
+                min={minSliderValue}
+                max={maxSliderValue}
                 initialValue={initialData?.opportunityTypeSlider * 100 || 50}
                 onChange={(val) =>
                   handleSliderChange("opportunityTypeSlider", val)
@@ -323,7 +355,8 @@ export default function PostModal({
             <div className="form-group">
               <label>Industry Impact</label>
               <Slider
-                min={50}
+                min={minSliderValue}
+                max={maxSliderValue}
                 initialValue={initialData?.industrySlider * 100 || 50}
                 onChange={(val) => handleSliderChange("industrySlider", val)}
               />
@@ -376,7 +409,8 @@ export default function PostModal({
               <div className="form-group">
                 <label>Tag Effect</label>
                 <Slider
-                  min={50}
+                  min={minSliderValue}
+                  max={maxSliderValue}
                   initialValue={initialData?.tagEffectSlider * 100 || 50}
                   onChange={(val) => handleSliderChange("tagEffectSlider", val)}
                 />
@@ -390,14 +424,16 @@ export default function PostModal({
                 <input
                   type="number"
                   defaultValue={initialData?.radius || 100}
-                  onChange={(e) => handleSelectChange("radius", e.target.value)}
+                  // onChange={(e) => handleSelectChange("radius", e.target.value)}
+                  {...register("radius")}
                 />
               </div>
 
               <div className="form-group">
                 <label>Radius Impact</label>
                 <Slider
-                min={50}
+                  min={minSliderValue}
+                  max={maxSliderValue}
                   initialValue={initialData?.radiusSlider * 100 || 50}
                   onChange={(val) => handleSliderChange("radiusSlider", val)}
                 />
@@ -406,7 +442,8 @@ export default function PostModal({
               <div className="form-group">
                 <label>Country Impact</label>
                 <Slider
-                min={50}
+                  min={minSliderValue}
+                  max={maxSliderValue}
                   initialValue={initialData?.countrySlider * 100 || 50}
                   onChange={(val) => handleSliderChange("countrySlider", val)}
                 />
@@ -418,7 +455,8 @@ export default function PostModal({
               <div className="form-group">
                 <label>Business Impact</label>
                 <Slider
-                min={50}
+                  min={minSliderValue}
+                  max={maxSliderValue}
                   initialValue={initialData?.businessSlider * 100 || 50}
                   onChange={(val) => handleSliderChange("businessSlider", val)}
                 />
@@ -427,7 +465,8 @@ export default function PostModal({
               <div className="form-group">
                 <label>Influencer Impact</label>
                 <Slider
-                min={50}
+                  min={minSliderValue}
+                  max={maxSliderValue}
                   initialValue={initialData?.influencerSlider * 100 || 50}
                   onChange={(val) =>
                     handleSliderChange("influencerSlider", val)
@@ -438,7 +477,8 @@ export default function PostModal({
               <div className="form-group">
                 <label>Individual Impact</label>
                 <Slider
-                min={50}
+                  min={minSliderValue}
+                  max={maxSliderValue}
                   initialValue={initialData?.individualSlider * 100 || 50}
                   onChange={(val) =>
                     handleSliderChange("individualSlider", val)

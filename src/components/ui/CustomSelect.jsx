@@ -4,23 +4,43 @@ import { FaAngleDown, FaPlus } from "react-icons/fa6";
 import { Button, Spacer } from "@geist-ui/core";
 import { RxCross2 } from "react-icons/rx";
 
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 const CustomSelect = ({
   searchComponent,
   formDataTags,
   tagChoices,
   formData,
   handleAddNewTag,
+  isSearchedTagFound
 }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [addedTags, setAddedTags] = useState([]);
+  const allAddedTags = [...new Set(addedTags)];
+
+  const {
+    register,
+    control,
+    formState: { errors, isLoading, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      tags: [],
+    },
+  });
+  const { fields } = useFieldArray({
+    control,
+    name: "tags",
+  });
+  console.log(fields, "fields");
 
   const handleAddTag = (id) => {
     // setAddedTags((prev)=> ({...prev,id}))
     setAddedTags((prev) => [...prev, id]);
   };
 
-  const allAddedTags = [...new Set(addedTags)];
-  console.log(allAddedTags);
+  // console.log(allAddedTags);
 
   const handleDeleteTag = (e, id) => {
     e.stopPropagation();
@@ -51,7 +71,7 @@ const CustomSelect = ({
               const exactTag = tagChoices.find(
                 (choice) => choice.id === singleAddedTag
               );
-              console.log(exactTag.label);
+              // console.log(exactTag.label);
               return (
                 <span
                   style={{
@@ -62,6 +82,7 @@ const CustomSelect = ({
                     alignItems: "center",
                     gap: "12px",
                   }}
+                  {...register("tags")}
                 >
                   {exactTag.label}
                   <RxCross2
@@ -88,13 +109,20 @@ const CustomSelect = ({
       {showOptions && (
         <div className="selectOptions">
           <Spacer h={0.5}></Spacer>
-          <div style={{
-            position:"relative"
-          }}>
+          <div
+            style={{
+              position: "relative",
+            }}
+          >
             {searchComponent}
-            <div className="addTagBtn" onClick={handleAddNewTag}><FaPlus/></div>
+            <div className="addTagBtn" onClick={handleAddNewTag}>
+              <FaPlus />
+            </div>
           </div>
           <div className="allOptions">
+            {isSearchedTagFound && (
+              <p style={{ fontSize: "12px" }}>this tag is not found !</p>
+            )}
             {formDataTags.length > 0
               ? formData.tags.map((tag) => (
                   <div
