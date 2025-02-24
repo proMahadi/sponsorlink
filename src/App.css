@@ -138,6 +138,19 @@ input[type="text"], textarea {
     display: flex;
     flex-direction: column;
 }
+.googleSearchLocationSuggest{
+    background-color: white;
+    color: #000 !important;
+    width: 100%;
+    text-align: left;
+    padding-left: 12px;
+    
+}
+.googleSearchLocationSuggest:hover{
+    background-color: rgba(222, 222, 222, 0.4);
+    color: #000 !important;
+
+}
 
 
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Divider,
   Input,
@@ -6,6 +6,7 @@ import {
   Toggle,
   Textarea,
   Modal,
+  AutoComplete,
 } from "@geist-ui/core";
 import {
   Mail,
@@ -22,6 +23,70 @@ import axios from "axios";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+// google maps imports & variables
+import {
+  GoogleMap,
+  useLoadScript,
+  Marker,
+  InfoWindow,
+} from "@react-google-maps/api";
+import usePlacesAutocomplete, {
+  getGeocode,
+  getLatLng,
+} from "use-places-autocomplete";
+
+const libraries = ["places"];
+const mapContainerStyle = {
+  height: "300px",
+  // width: "100vw",
+};
+const options = {
+  // styles: mapStyles,
+  disableDefaultUI: true,
+  zoomControl: true,
+};
+// const myLocation =   navigator.geolocation.getCurrentPosition((position) => panTo({lat: position.coords.latitude,lng: position.coords.longitude,}));
+// const myLatitude =   navigator.geolocation.getCurrentPosition((position) => position.coords.latitude);
+
+// console.log(myLatitude,"mylocation")
+
+const center = {
+  lat: 0,
+  lng: 0,
+};
+navigator.geolocation.getCurrentPosition((position) => {
+  const myLocation = {
+    lat: position.coords.latitude,
+    lng: position.coords.longitude,
+  };
+
+  console.log(myLocation, "my location");
+
+  // Update center with myLocation values
+  center.lat = myLocation.lat;
+  center.lng = myLocation.lng;
+
+  console.log(center, "updated center");
+});
+// google maps imports & variables
+
+//  <button
+// className="locate"
+// onClick={() => {
+//   navigator.geolocation.getCurrentPosition(
+//     (position) => {
+//       panTo({
+//         lat: position.coords.latitude,
+//         lng: position.coords.longitude,
+//       });
+//     },
+//     () => null
+//   );
+// }}
+// >
+// <img src="/compass.svg" alt="compass" />
+// </button>
 
 const INITIAL_DATA = {
   id: null,
@@ -59,6 +124,9 @@ const CreateProfileSchema = z.object({
   surname: z.string().min(1, "surname is required"),
   username: z.string().min(1, "username is required"),
   phone_number: z.string().min(1, "phone number is required"),
+  address: z.string().min(1, "address is required"),
+  city: z.string().min(1, "city is required"),
+  country: z.string().min(1, "country is required"),
   user_type: z.string().min(1, "user type is required"),
   industryChoices: z.string().min(1, "industry field is required"),
   tagChoices: z.string().min((length = 1), "minimum 1 tag is required"),
@@ -76,6 +144,149 @@ export default function RegiserForm({ User, setUser }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState("");
 
+  // google maps states hooks and functions
+  const { isLoaded, loadError } = useLoadScript({
+    // googleMapsApiKey:"AIzaSyCIP2gFBWK0kxyEL5OFarGGfwlSkaiqC2c",
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    // googleMapsApiKey:`${import.meta.env.GOOGLE_MAPS_API_KEY}`,
+    libraries,
+  });
+  const [markers, setMarkers] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState({
+    street_name: "",
+    route: "",
+    area: "",
+    postal_code: "",
+    city: "",
+    country: "",
+    address: ""
+  });
+  console.log(markers, "selected lat lng");
+  const { street_name, route, area, postal_code, city, country } =
+    selectedLocation;
+  console.log(
+    street_name,
+    route,
+    area,
+    postal_code,
+    city,
+    country,
+    "slected city and country"
+  );
+
+  const fetchGeocodeResults = async () => {
+    try {
+      const results = await Promise.all(
+        markers.map((marker) =>
+          getGeocode({ location: { lat: marker.lat, lng: marker.lng } })
+        )
+      );
+
+      // Extract city and country from the results
+      results.forEach((result) => {
+        if (result.length > 0) {
+          const addressComponents = result[0].address_components;
+
+          console.log(addressComponents, "address component");
+
+          let city = "";
+          let country = "";
+          let area = "";
+          let route = "";
+          let postal_code = "";
+          let street_name = "";
+
+          addressComponents.forEach((component) => {
+            if (component.types.includes("establishment")) {
+              street_name = component.long_name;
+            }
+            if (component.types.includes("postal_code")) {
+              postal_code = component.long_name;
+            }
+            if (component.types.includes("route")) {
+              route = component.long_name;
+            }
+            if (component.types.includes("sublocality")) {
+              area = component.long_name;
+            }
+            if (component.types.includes("locality")) {
+              city = component.long_name;
+            }
+            if (component.types.includes("country")) {
+              country = component.long_name;
+            }
+            setSelectedLocation({
+              city: city,
+              country: country,
+              area: area,
+              route: route,
+              postal_code: postal_code,
+              street_name: street_name,
+              address: result[0].formatted_address
+            });
+          });
+
+          console.log(
+            "City:",
+            city,
+            "Country:",
+            country,
+            "Area:",
+            area,
+            "route:",
+            route,
+            "postal:",
+            postal_code,
+            "street name:",
+            street_name
+          );
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching geocode results:", error);
+    }
+  };
+  // google maps states hooks and functions
+
+  // useEffect(() => {
+  //   if (markers.length > 0) {
+  //     fetchGeocodeResults();
+  //   }
+  // }, [markers]);
+
+
+  const onMapClick = useCallback((e) => {
+    console.log(e.latLng.lat(), "latitude");
+    console.log(e.latLng.lng(), "longitude");
+    setMarkers((current) => [
+      // ...current,
+      {
+        lat: e.latLng.lat(),
+        lng: e.latLng.lng(),
+        time: new Date(),
+      },
+    ]);
+  }, []);
+
+  const mapRef = useRef();
+  const onMapLoad = useCallback((map) => {
+    mapRef.current = map;
+  }, []);
+
+  const panTo = useCallback(({ lat, lng }) => {
+    mapRef.current.panTo({ lat, lng });
+    mapRef.current.setZoom(14);
+    setMarkers((current) => [
+      // ...current,
+      {
+        lat,
+        lng,
+        time: new Date(),
+      },
+    ]);
+  }, []);
+
   const {
     register,
     control,
@@ -86,6 +297,9 @@ export default function RegiserForm({ User, setUser }) {
       surname: "",
       username: "",
       phone_number: "",
+      address: "",
+      city: "",
+      country: "",
       user_type: "",
       industryChoices: "",
       tags: [],
@@ -98,10 +312,10 @@ export default function RegiserForm({ User, setUser }) {
     },
   });
 
-  const { fields } = useFieldArray({
-    control,
-    name: "tags",
-  });
+  // const { fields } = useFieldArray({
+  //   control,
+  //   name: "tags",
+  // });
 
   useEffect(() => {
     if (User?.id) {
@@ -113,7 +327,10 @@ export default function RegiserForm({ User, setUser }) {
         setFormData({ ...INITIAL_DATA, ...User });
       }
     }
-  }, [User]);
+    if (markers.length > 0) {
+      fetchGeocodeResults();
+    }
+  }, [User, markers]);
 
   const handleInputChange = (name, value) => {
     setFormData((prev) => {
@@ -134,12 +351,12 @@ export default function RegiserForm({ User, setUser }) {
     e.preventDefault();
 
     // Get location data before saving
-    const { address, postcode, city, country } = formData;
-    const query = `${address}, ${postcode}, ${city}, ${country}`;
-    const apiKey = "1f64891487fe462d8161fc8f19befe87";
-    const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
-      query
-    )}&key=${apiKey}&no_annotations=1&language=en`;
+    // const { address, postcode, city, country } = formData;
+    // const query = `${address}, ${postcode}, ${city}, ${country}`;
+    // const apiKey = "1f64891487fe462d8161fc8f19befe87";
+    // const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
+    //   query
+    // )}&key=${apiKey}&no_annotations=1&language=en`;
 
     try {
       const response = await axios.get(url);
@@ -204,202 +421,269 @@ export default function RegiserForm({ User, setUser }) {
     setIsModalOpen(false);
   };
 
-  const renderPersonalInfo = () => (
-    <>
-      <div
-        className="profile-image-circle"
-        onClick={() => setIsModalOpen(true)}
-        style={{
-          backgroundImage: formData.profile_image
-            ? `url(${formData.profile_image})`
-            : "none",
-        }}
-      >
-        {!formData.profile_image && <Edit />}
-      </div>
+  if (loadError) return "Error";
+  if (!isLoaded) return "Loading...";
 
-      <Modal visible={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <Modal.Title>Add Profile Image URL</Modal.Title>
-        <Modal.Content>
-          <Input
-            width="100%"
-            value={tempImageUrl}
-            onChange={(e) => setTempImageUrl(e.target.value)}
-            placeholder="Enter image URL"
-          />
-        </Modal.Content>
-        <Modal.Action passive onClick={() => setIsModalOpen(false)}>
-          Cancel
-        </Modal.Action>
-        <Modal.Action onClick={handleImageSave}>Save</Modal.Action>
-      </Modal>
+  const renderPersonalInfo = () => {
+    // const options = [
+    //   { label: 'London', value: 'london' },
+    //   { label: 'Sydney', value: 'sydney' },
+    //   { label: 'Shanghai', value: 'shanghai' },
+    // ]
 
-      <br />
-
-      <div className="flex-fields">
+    return (
+      <>
         <div
+          className="profile-image-circle"
+          onClick={() => setIsModalOpen(true)}
           style={{
-            width: "100%",
+            backgroundImage: formData.profile_image
+              ? `url(${formData.profile_image})`
+              : "none",
           }}
         >
-          <Input
-            width="100%"
-            //   value={formData.first_name}
-            //   onChange={(e) => handleInputChange("first_name", e.target.value)}
-            placeholder="John"
-            {...register("first_name")}
-          >
-            First Name
-          </Input>
-          {errors.first_name && (
-            <p
-              style={{
-                color: "red",
-                fontSize: "12px",
-              }}
-            >
-              {errors.first_name.message}
-            </p>
-          )}
+          {!formData.profile_image && <Edit />}
         </div>
-        <div
-          style={{
-            width: "100%",
-          }}
-        >
-          <Input
-            width="100%"
-            //   value={formData.surname}
-            //   onChange={(e) => handleInputChange("surname", e.target.value)}
-            placeholder="Smith"
-            {...register("surname")}
-          >
-            Surname
-          </Input>
-          {errors.surname && (
-            <p
-              style={{
-                color: "red",
-                fontSize: "12px",
-              }}
-            >
-              {errors.surname.message}
-            </p>
-          )}
-        </div>
-      </div>
-      <br />
 
-      <div className="flex-fields">
-        <div
-          style={{
-            width: "100%",
-          }}
-        >
-          <Input
-            width="100%"
-            //   value={formData.username}
-            //   onChange={(e) => handleInputChange("username", e.target.value)}
-            placeholder="johnsmith1988"
-            {...register("username")}
-          >
-            Username
-          </Input>
-          {errors.username && (
-            <p
-              style={{
-                color: "red",
-                fontSize: "12px",
-              }}
-            >
-              {errors.username.message}
-            </p>
-          )}
-        </div>
-        <div
-          style={{
-            width: "100%",
-          }}
-        >
-          <Input
-            width="100%"
-            icon={<Phone />}
-            //   value={formData.phone}
-            //   onChange={(e) => handleInputChange("phone", e.target.value)}
-            placeholder="+44 123 456 7890"
-            {...register("phone_number")}
-          >
-            Phone Number
-          </Input>
-          {errors.phone_number && (
-            <p
-              style={{
-                color: "red",
-                fontSize: "12px",
-              }}
-            >
-              {errors.phone_number.message}
-            </p>
-          )}
-        </div>
-      </div>
-      <br />
-      <Divider>
-        <span style={{ fontWeight: "400", color: "#444" }}>Address</span>
-      </Divider>
-      <br />
-      <div className="address-fields">
+        <Modal visible={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <Modal.Title>Add Profile Image URL</Modal.Title>
+          <Modal.Content>
+            <Input
+              width="100%"
+              value={tempImageUrl}
+              onChange={(e) => setTempImageUrl(e.target.value)}
+              placeholder="Enter image URL"
+            />
+          </Modal.Content>
+          <Modal.Action passive onClick={() => setIsModalOpen(false)}>
+            Cancel
+          </Modal.Action>
+          <Modal.Action onClick={handleImageSave}>Save</Modal.Action>
+        </Modal>
+
+        <br />
+
         <div className="flex-fields">
-          <div className="with-label">
-            <label>Country</label>
-            <Select
-              width="calc(100% - 16px)"
-              //   value={formData.country}
-              //   onChange={(e) => handleInputChange("country", e)}
-              placeholder="Select Country"
+          <div
+            style={{
+              width: "100%",
+            }}
+          >
+            <Input
+              width="100%"
+              //   value={formData.first_name}
+              //   onChange={(e) => handleInputChange("first_name", e.target.value)}
+              placeholder="John"
+              {...register("first_name")}
             >
-              {countryChoices.map((choice) => (
-                <Select.Option key={choice.value} value={choice.value}>
-                  {choice.label}
-                </Select.Option>
-              ))}
-            </Select>
+              First Name
+            </Input>
+            {errors.first_name && (
+              <p
+                style={{
+                  color: "red",
+                  fontSize: "12px",
+                }}
+              >
+                {errors.first_name.message}
+              </p>
+            )}
           </div>
-          <Input
-            width="100%"
-            // value={formData.postcode}
-            // onChange={(e) => handleInputChange("postcode", e.target.value)}
-            placeholder="Postcode"
+          <div
+            style={{
+              width: "100%",
+            }}
           >
-            Postcode
-          </Input>
+            <Input
+              width="100%"
+              //   value={formData.surname}
+              //   onChange={(e) => handleInputChange("surname", e.target.value)}
+              placeholder="Smith"
+              {...register("surname")}
+            >
+              Surname
+            </Input>
+            {errors.surname && (
+              <p
+                style={{
+                  color: "red",
+                  fontSize: "12px",
+                }}
+              >
+                {errors.surname.message}
+              </p>
+            )}
+          </div>
         </div>
-        <div className="flex-fields">
-          <Input
-            width="100%"
-            // value={formData.address}
-            // onChange={(e) => handleInputChange("address", e.target.value)}
-            placeholder="Address"
-          >
-            Address
-          </Input>
-          <Input
-            width="100%"
-            // value={formData.city}
-            // onChange={(e) => handleInputChange("city", e.target.value)}
-            placeholder="City"
-          >
-            City
-          </Input>
-        </div>
-      </div>
+        <br />
 
-      <br />
-      <button type="button" onClick={() => setCurrentStep("profile")}>
-        Next
-      </button>
-    </>
-  );
+        <div className="flex-fields">
+          <div
+            style={{
+              width: "100%",
+            }}
+          >
+            <Input
+              width="100%"
+              //   value={formData.username}
+              //   onChange={(e) => handleInputChange("username", e.target.value)}
+              placeholder="johnsmith1988"
+              {...register("username")}
+            >
+              Username
+            </Input>
+            {errors.username && (
+              <p
+                style={{
+                  color: "red",
+                  fontSize: "12px",
+                }}
+              >
+                {errors.username.message}
+              </p>
+            )}
+          </div>
+          <div
+            style={{
+              width: "100%",
+            }}
+          >
+            <Input
+              width="100%"
+              icon={<Phone />}
+              //   value={formData.phone}
+              //   onChange={(e) => handleInputChange("phone", e.target.value)}
+              placeholder="+44 123 456 7890"
+              {...register("phone_number")}
+            >
+              Phone Number
+            </Input>
+            {errors.phone_number && (
+              <p
+                style={{
+                  color: "red",
+                  fontSize: "12px",
+                }}
+              >
+                {errors.phone_number.message}
+              </p>
+            )}
+          </div>
+        </div>
+        <br />
+        <Divider>
+          <span style={{ fontWeight: "400", color: "#444" }}>
+            Enter your Address
+          </span>
+        </Divider>
+        <br />
+        <div className="address-fields">
+          <div>
+            {/* <Locate panTo={panTo} /> */}
+            <div
+              style={{
+                marginBottom: "14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+              }}
+            >
+              <Search selectedLocation={selectedLocation} panTo={panTo} />
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
+                <Input
+                  value={
+                    street_name !== "" ||
+                    route !== "" ||
+                    area !== "" ||
+                    postal_code !== "" ||
+                    city !== "" ||
+                    country !== ""
+                      ? `${street_name} ${route} ${area} ${postal_code} ${city} ${country}`
+                      : ""
+                  }
+                  placeholder="Address"
+                  width="100%"
+                  // {...register("address")}
+                  style={{
+                    color:"black"
+                  }}
+                />
+                <Input
+                  value={city}
+                  placeholder="City"
+                  width="100%"
+                  // {...register("city")}
+                />
+                <Input
+                  value={country}
+                  placeholder="Country"
+                  width="100%"
+                  // {...register("country")}
+                />
+              </div>
+            </div>
+
+            <GoogleMap
+              id="map"
+              mapContainerStyle={mapContainerStyle}
+              zoom={8}
+              center={center}
+              options={options}
+              onClick={onMapClick}
+              onLoad={onMapLoad}
+              streetView={true}
+            >
+              {markers.map((marker) => (
+                <Marker
+                  key={`${marker.lat}-${marker.lng}`}
+                  position={{ lat: marker.lat, lng: marker.lng }}
+                  onClick={() => {
+                    setSelected(marker);
+                  }}
+                  // icon={{
+                  //   url: `/bear.svg`,
+                  //   origin: new window.google.maps.Point(0, 0),
+                  //   anchor: new window.google.maps.Point(15, 15),
+                  //   scaledSize: new window.google.maps.Size(30, 30)
+                  // }}
+                />
+              ))}
+
+              {selected ? (
+                <InfoWindow
+                  position={{ lat: selected.lat, lng: selected.lng }}
+                  onCloseClick={() => {
+                    setSelected(null);
+                  }}
+                >
+                  <div>
+                    <h2>
+                      <span role="img" aria-label="bear">
+                        🐻
+                      </span>{" "}
+                      Alert
+                    </h2>
+                    {/* <p>Spotted {formatRelative(selected.time, new Date())}</p> */}
+                  </div>
+                </InfoWindow>
+              ) : null}
+            </GoogleMap>
+          </div>
+        </div>
+        <br />
+        <button type="button" onClick={() => setCurrentStep("profile")}>
+          Next
+        </button>
+      </>
+    );
+  };
   const renderProfileDetails = () => (
     <div className="profile-details">
       <div className="flex-fields">
@@ -691,3 +975,105 @@ export default function RegiserForm({ User, setUser }) {
     </div>
   );
 }
+
+const Search = ({ panTo, selectedLocation }) => {
+  const {
+    ready,
+    value,
+    suggestions: { status, data },
+    setValue,
+    clearSuggestions,
+  } = usePlacesAutocomplete({
+    requestOptions: {
+      location: { lat: () => 43.6532, lng: () => -79.3832 },
+      radius: 100 * 1000,
+    },
+  });
+
+  // https://developers.google.com/maps/documentation/javascript/reference/places-autocomplete-service#AutocompletionRequest
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  useEffect(() => {
+    console.log('Location', selectedLocation)
+    if(selectedLocation.address) {
+      setValue(selectedLocation.address);
+    }
+    if (data.length > 0) {
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
+  }, [data, selectedLocation]);
+
+  const handleInput = (e) => {
+    setValue(e.target.value);
+    
+  };
+
+  const handleSelect = async (address) => {
+    setValue(address);
+    clearSuggestions();
+    // setShowSuggestions(false)
+    setTimeout(() => setValue(null), 10);
+
+    try {
+      const results = await getGeocode({ address });
+      const { lat, lng } = await getLatLng(results[0]);
+      panTo({ lat, lng });
+    } catch (error) {
+      console.log("😱 Error: ", error);
+    }
+  };
+  const { street_name, route, area, postal_code, city, country } =
+    selectedLocation;
+
+  return (
+    <div
+      className="search"
+      style={{
+        position: "relative",
+        width: "100%",
+      }}
+    >
+      <Input
+        value={value}
+        onChange={handleInput}
+        disabled={!ready}
+        placeholder="Search your location"
+        width="100%"
+      />
+
+      {showSuggestions && (
+        <ul
+          style={{
+            position: "absolute",
+            top: "22px",
+            left: "0",
+            background: "white",
+            height: "fit-content",
+            // width: "fit-content",
+            zIndex: "999",
+            padding: "8px",
+            borderRadius: "8px",
+            border: "1px solid #dedede",
+          }}
+        >
+          {status === "OK" &&
+            data.map((mapData) => (
+              // console.log(mapData,"map")
+              <li
+                style={{
+                  listStyleType: "none",
+                }}
+                onClick={() => handleSelect(mapData.description)}
+                key={mapData.id}
+              >
+                <button className="googleSearchLocationSuggest">
+                  {mapData.description}
+                </button>
+              </li>
+            ))}
+        </ul>
+      )}
+    </div>
+  );
+};
