@@ -30,6 +30,7 @@ import {
   useLoadScript,
   Marker,
   InfoWindow,
+  Circle,
 } from "@react-google-maps/api";
 import usePlacesAutocomplete, {
   getGeocode,
@@ -42,6 +43,11 @@ const mapContainerStyle = {
   // width: "100vw",
 };
 const options = {
+  // styles: mapStyles,
+  disableDefaultUI: true,
+  zoomControl: true,
+};
+const circleOptions = {
   // styles: mapStyles,
   disableDefaultUI: true,
   zoomControl: true,
@@ -61,13 +67,13 @@ navigator.geolocation.getCurrentPosition((position) => {
     lng: position.coords.longitude,
   };
 
-  console.log(myLocation, "my location");
+  // console.log(myLocation, "my location");
 
   // Update center with myLocation values
   center.lat = myLocation.lat;
   center.lng = myLocation.lng;
 
-  console.log(center, "updated center");
+  // console.log(center, "updated center");
 });
 // google maps imports & variables
 
@@ -146,26 +152,26 @@ export default function RegiserForm({ User, setUser }) {
 
   // google maps states hooks and functions
   const { isLoaded, loadError } = useLoadScript({
-    // googleMapsApiKey:"AIzaSyCIP2gFBWK0kxyEL5OFarGGfwlSkaiqC2c",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    // googleMapsApiKey:`${import.meta.env.GOOGLE_MAPS_API_KEY}`,
     libraries,
   });
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState({
+    house:"",
     street_name: "",
     route: "",
     area: "",
     postal_code: "",
     city: "",
     country: "",
-    address: ""
+    address: "",
   });
   console.log(markers, "selected lat lng");
-  const { street_name, route, area, postal_code, city, country } =
+  const { house,street_name, route, area, postal_code, city, country } =
     selectedLocation;
   console.log(
+    house,
     street_name,
     route,
     area,
@@ -196,8 +202,12 @@ export default function RegiserForm({ User, setUser }) {
           let route = "";
           let postal_code = "";
           let street_name = "";
+          let house = "";
 
           addressComponents.forEach((component) => {
+            if (component.types.includes("street_number")) {
+              house = component.long_name;
+            }
             if (component.types.includes("establishment")) {
               street_name = component.long_name;
             }
@@ -217,13 +227,14 @@ export default function RegiserForm({ User, setUser }) {
               country = component.long_name;
             }
             setSelectedLocation({
+              house:house,
               city: city,
               country: country,
               area: area,
               route: route,
               postal_code: postal_code,
               street_name: street_name,
-              address: result[0].formatted_address
+              address: result[0].formatted_address,
             });
           });
 
@@ -254,7 +265,6 @@ export default function RegiserForm({ User, setUser }) {
   //     fetchGeocodeResults();
   //   }
   // }, [markers]);
-
 
   const onMapClick = useCallback((e) => {
     console.log(e.latLng.lat(), "latitude");
@@ -599,20 +609,21 @@ export default function RegiserForm({ User, setUser }) {
               >
                 <Input
                   value={
+                    house !== "" ||
                     street_name !== "" ||
                     route !== "" ||
                     area !== "" ||
                     postal_code !== "" ||
                     city !== "" ||
                     country !== ""
-                      ? `${street_name} ${route} ${area} ${postal_code} ${city} ${country}`
+                      ? `${house} ${street_name} ${route} ${area} ${postal_code} ${city} ${country}`
                       : ""
                   }
                   placeholder="Address"
                   width="100%"
                   // {...register("address")}
                   style={{
-                    color:"black"
+                    color: "black",
                   }}
                 />
                 <Input
@@ -638,22 +649,32 @@ export default function RegiserForm({ User, setUser }) {
               options={options}
               onClick={onMapClick}
               onLoad={onMapLoad}
-              streetView={true}
             >
               {markers.map((marker) => (
-                <Marker
-                  key={`${marker.lat}-${marker.lng}`}
-                  position={{ lat: marker.lat, lng: marker.lng }}
-                  onClick={() => {
-                    setSelected(marker);
-                  }}
-                  // icon={{
-                  //   url: `/bear.svg`,
-                  //   origin: new window.google.maps.Point(0, 0),
-                  //   anchor: new window.google.maps.Point(15, 15),
-                  //   scaledSize: new window.google.maps.Size(30, 30)
-                  // }}
-                />
+                <>
+                  <Marker
+                    key={`${marker.lat}-${marker.lng}`}
+                    position={{ lat: marker.lat, lng: marker.lng }}
+                    onClick={() => {
+                      setSelected(marker);
+                    }}
+                    // icon={{
+                    //   url: `/bear.svg`,
+                    //   origin: new window.google.maps.Point(0, 0),
+                    //   anchor: new window.google.maps.Point(15, 15),
+                    //   scaledSize: new window.google.maps.Size(30, 30)
+                    // }}
+                  />
+                  <Circle
+                    center={{ lat: marker.lat, lng: marker.lng }}
+                    radius={100}
+                    options={circleOptions}
+                    onCenterChanged={() => console.log("onCenterChanged")}
+                    onRadiusChanged={() => console.log("onRadiusChanged")}
+                    min={50}
+                    max={100}
+                  />
+                </>
               ))}
 
               {selected ? (
@@ -993,10 +1014,10 @@ const Search = ({ panTo, selectedLocation }) => {
   // https://developers.google.com/maps/documentation/javascript/reference/places-autocomplete-service#AutocompletionRequest
   const [showSuggestions, setShowSuggestions] = useState(false);
   useEffect(() => {
-    console.log('Location', selectedLocation)
-    if(selectedLocation.address) {
-      setValue(selectedLocation.address);
-    }
+    // console.log('Location', selectedLocation)
+    // if(selectedLocation.address) {
+    //   setValue(selectedLocation.address);
+    // }
     if (data.length > 0) {
       setShowSuggestions(true);
     } else {
@@ -1006,7 +1027,6 @@ const Search = ({ panTo, selectedLocation }) => {
 
   const handleInput = (e) => {
     setValue(e.target.value);
-    
   };
 
   const handleSelect = async (address) => {

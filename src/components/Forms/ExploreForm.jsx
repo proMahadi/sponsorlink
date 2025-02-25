@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Button,
   Input,
@@ -20,6 +20,59 @@ import CustomSelect from "../ui/CustomSelect";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+// google maps imports & variables
+import {
+  GoogleMap,
+  useLoadScript,
+  Marker,
+  InfoWindow,
+  Circle,
+} from "@react-google-maps/api";
+import usePlacesAutocomplete, {
+  getGeocode,
+  getLatLng,
+} from "use-places-autocomplete";
+
+const libraries = ["places"];
+const mapContainerStyle = {
+  height: "100px",
+  // width: "100vw",
+};
+const options = {
+  // styles: mapStyles,
+  disableDefaultUI: true,
+  zoomControl: true,
+};
+const circleOptions = {
+  // styles: mapStyles,
+  disableDefaultUI: true,
+  zoomControl: true,
+};
+// const myLocation =   navigator.geolocation.getCurrentPosition((position) => panTo({lat: position.coords.latitude,lng: position.coords.longitude,}));
+// const myLatitude =   navigator.geolocation.getCurrentPosition((position) => position.coords.latitude);
+
+// console.log(myLatitude,"mylocation")
+
+const center = {
+  lat: 0,
+  lng: 0,
+};
+navigator.geolocation.getCurrentPosition((position) => {
+  const myLocation = {
+    lat: position.coords.latitude,
+    lng: position.coords.longitude,
+  };
+
+  // console.log(myLocation, "my location");
+
+  // Update center with myLocation values
+  center.lat = myLocation.lat;
+  center.lng = myLocation.lng;
+
+  // console.log(center, "updated center");
+});
+// google maps imports & variables
 
 const ExploreFormSchema = z.object({
   opportunity_type: z.string().min(1, "opportunity type is required"),
@@ -69,18 +122,160 @@ const ExploreForm = ({ onSubmit, loading }) => {
     tagEffectSlider: 50,
   });
 
-  const [userLocation, setUserLocation] = useState({
-    country: "",
-    latitude: 0,
-    longitude: 0,
+  // google maps states hooks and functions
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries,
   });
+  const [markers, setMarkers] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [addressValue,setAddressValue]=useState("")
+  const [selectedLocation, setSelectedLocation] = useState({
+    house: "",
+    street_name: "",
+    route: "",
+    area: "",
+    postal_code: "",
+    city: "",
+    country: "",
+    address: "",
+  });
+  console.log(markers, "selected lat lng");
+  const { house, street_name, route, area, postal_code, city, country } =
+    selectedLocation;
+  console.log(
+    house,
+    street_name,
+    route,
+    area,
+    postal_code,
+    city,
+    country,
+    "slected city and country"
+  );
+
+  const fetchGeocodeResults = async () => {
+    try {
+      const results = await Promise.all(
+        markers.map((marker) =>
+          getGeocode({ location: { lat: marker.lat, lng: marker.lng } })
+        )
+      );
+
+      // Extract city and country from the results
+      results.forEach((result) => {
+        if (result.length > 0) {
+          const addressComponents = result[0].address_components;
+
+          console.log(addressComponents, "address component");
+
+          let city = "";
+          let country = "";
+          let area = "";
+          let route = "";
+          let postal_code = "";
+          let street_name = "";
+          let house = "";
+
+          addressComponents.forEach((component) => {
+            if (component.types.includes("street_number")) {
+              house = component.long_name;
+            }
+            if (component.types.includes("establishment")) {
+              street_name = component.long_name;
+            }
+            if (component.types.includes("postal_code")) {
+              postal_code = component.long_name;
+            }
+            if (component.types.includes("route")) {
+              route = component.long_name;
+            }
+            if (component.types.includes("sublocality")) {
+              area = component.long_name;
+            }
+            if (component.types.includes("locality")) {
+              city = component.long_name;
+            }
+            if (component.types.includes("country")) {
+              country = component.long_name;
+            }
+            setSelectedLocation({
+              house: house,
+              city: city,
+              country: country,
+              area: area,
+              route: route,
+              postal_code: postal_code,
+              street_name: street_name,
+              address: result[0].formatted_address,
+            });
+          });
+
+          console.log(
+            "City:",
+            city,
+            "Country:",
+            country,
+            "Area:",
+            area,
+            "route:",
+            route,
+            "postal:",
+            postal_code,
+            "street name:",
+            street_name
+          );
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching geocode results:", error);
+    }
+  };
+
+  const onMapClick = useCallback((e) => {
+    console.log(e.latLng.lat(), "latitude");
+    console.log(e.latLng.lng(), "longitude");
+    setMarkers((current) => [
+      // ...current,
+      {
+        lat: e.latLng.lat(),
+        lng: e.latLng.lng(),
+        time: new Date(),
+      },
+    ]);
+  }, []);
+
+  const mapRef = useRef();
+  const onMapLoad = useCallback((map) => {
+    mapRef.current = map;
+  }, []);
+
+  const panTo = useCallback(({ lat, lng }) => {
+    mapRef.current.panTo({ lat, lng });
+    mapRef.current.setZoom(14);
+    setMarkers((current) => [
+      // ...current,
+      {
+        lat,
+        lng,
+        time: new Date(),
+      },
+    ]);
+  }, []);
+  // google maps states hooks and functions
+
+  // const [userLocation, setUserLocation] = useState({
+  //   country: "",
+  //   latitude: 0,
+  //   longitude: 0,
+  // });
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user") || "{}");
-    setUserLocation({
-      country: user.country || "",
-      latitude: user.latitude || 0,
-      longitude: user.longitude || 0,
-    });
+    // setUserLocation({
+    //   country: user.country || "",
+    //   latitude: user.latitude || 0,
+    //   longitude: user.longitude || 0,
+    // });
   }, []);
 
   useEffect(() => {
@@ -112,7 +307,11 @@ const ExploreForm = ({ onSubmit, loading }) => {
       }));
     }
     setIsInitialized(true);
-  }, []);
+
+    if (markers.length > 0) {
+      fetchGeocodeResults();
+    }
+  }, [markers]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -163,7 +362,7 @@ const ExploreForm = ({ onSubmit, loading }) => {
   const [newTag, setNewTag] = useState(null);
   const [searchTagInputValue, setSearchTagInputValue] = useState(null);
   const [tags, setTags] = useState(tagChoices);
-  const [isSearchedTagFound,setIsSearchedTagFound]=useState(false)
+  const [isSearchedTagFound, setIsSearchedTagFound] = useState(false);
   const handleTagSearch = (e) => {
     const searchQuery = e.target.value.toLowerCase();
 
@@ -177,14 +376,14 @@ const ExploreForm = ({ onSubmit, loading }) => {
 
     if (foundTag.length < 1 && e.target.value.trim() !== "") {
       setIsSearchedTagFound(true);
-  }else{
-    setIsSearchedTagFound(false)
-  }
-    
-      setFormData((prev) => ({
-        ...prev,
-        tags: foundTag.map((tag) => tag),
-      }));
+    } else {
+      setIsSearchedTagFound(false);
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      tags: foundTag.map((tag) => tag),
+    }));
   };
   const handleAddNewTag = () => {
     if (
@@ -202,13 +401,22 @@ const ExploreForm = ({ onSubmit, loading }) => {
   };
   console.log(newTag);
 
+  const onAddressChange =(e)=>{
+    setAddressValue(e.target.value)
+  }
+  // const handleRadiusChange =(e)=>{
+  //   setFormData((prev)=>({...prev,radius:e.target.value}))
+  //   // setSliderValues((prev)=>({...prev,radiusSlider:e.target.value}))
+  // }
+
   if (!isInitialized) {
     return;
   }
-
+  if (loadError) return "Error";
+  if (!isLoaded) return "Loading...";
   return (
     <>
-      <Card className="prevent-select" >
+      <Card className="prevent-select">
         <Text h3 style={{ fontWeight: "600", textAlign: "center" }}>
           Find a Match
         </Text>
@@ -378,14 +586,108 @@ const ExploreForm = ({ onSubmit, loading }) => {
             </Collapse>
 
             <Collapse title="Distance" bordered>
-              <Input
-                name="radius"
-                initialValue={formData.radius}
-                htmlType="number"
-                // onChange={handleChange}
-                placeholder="Radius"
-                {...register("radius")}
-              />
+              <Search selectedLocation={selectedLocation} panTo={panTo} />
+              <Spacer h={1}></Spacer>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "14px",
+                }}
+              >
+                <Input
+                  name="radius"
+                  initialValue={formData.radius}
+                  htmlType="number"
+                  // onChange={handleRadiusChange}
+                  placeholder="Radius"
+                  {...register("radius")}
+                  width="100%"
+                />
+                <Input
+                  value={
+                    house !== "" ||
+                    street_name !== "" ||
+                    route !== "" ||
+                    area !== "" ||
+                    postal_code !== "" ||
+                    city !== "" ||
+                    country !== ""
+                      ? `${house} ${street_name} ${route} ${area} ${postal_code} ${city} ${country}`
+                      : addressValue
+                  }
+                  placeholder="Address"
+                  width="100%"
+                  // {...register("address")}
+                  style={{
+                    color: "black",
+                  }}
+                  onChange={onAddressChange}
+                />
+              </div>
+              <div
+              style={{
+                display:"none"
+              }} 
+              >
+              <Spacer h={1}></Spacer>
+                <GoogleMap
+                  id="map"
+                  mapContainerStyle={mapContainerStyle}
+                  zoom={8}
+                  center={center}
+                  options={options}
+                  onClick={onMapClick}
+                  onLoad={onMapLoad}
+                >
+                  {markers.map((marker) => (
+                    <>
+                      <Marker
+                        key={`${marker.lat}-${marker.lng}`}
+                        position={{ lat: marker.lat, lng: marker.lng }}
+                        onClick={() => {
+                          setSelected(marker);
+                        }}
+                        // icon={{
+                        //   url: `/bear.svg`,
+                        //   origin: new window.google.maps.Point(0, 0),
+                        //   anchor: new window.google.maps.Point(15, 15),
+                        //   scaledSize: new window.google.maps.Size(30, 30)
+                        // }}
+                      />
+                      <Circle
+                        center={{ lat: marker.lat, lng: marker.lng }}
+                        radius={sliderValues.radiusSlider}
+                        options={circleOptions}
+                        onCenterChanged={() => console.log("onCenterChanged")}
+                        onRadiusChanged={() => console.log("onRadiusChanged")}
+                        min={minSliderValue}
+                        max={maxSliderValue}
+                      />
+                    </>
+                  ))}
+
+                  {selected ? (
+                    <InfoWindow
+                      position={{ lat: selected.lat, lng: selected.lng }}
+                      onCloseClick={() => {
+                        setSelected(null);
+                      }}
+                    >
+                      <div>
+                        <h2>
+                          <span role="img" aria-label="bear">
+                            🐻
+                          </span>{" "}
+                          Alert
+                        </h2>
+                        {/* <p>Spotted {formatRelative(selected.time, new Date())}</p> */}
+                      </div>
+                    </InfoWindow>
+                  ) : null}
+                </GoogleMap>
+              </div>
               <br />
               <Spacer h={1}></Spacer>
               <div>
@@ -469,3 +771,104 @@ const ExploreForm = ({ onSubmit, loading }) => {
 };
 
 export default ExploreForm;
+
+const Search = ({ panTo, selectedLocation }) => {
+  const {
+    ready,
+    value,
+    suggestions: { status, data },
+    setValue,
+    clearSuggestions,
+  } = usePlacesAutocomplete({
+    requestOptions: {
+      location: { lat: () => 43.6532, lng: () => -79.3832 },
+      radius: 100 * 1000,
+    },
+  });
+
+  // https://developers.google.com/maps/documentation/javascript/reference/places-autocomplete-service#AutocompletionRequest
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  useEffect(() => {
+    // console.log('Location', selectedLocation)
+    // if(selectedLocation.address) {
+    //   setValue(selectedLocation.address);
+    // }
+    if (data.length > 0) {
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
+  }, [data, selectedLocation]);
+
+  const handleInput = (e) => {
+    setValue(e.target.value);
+  };
+
+  const handleSelect = async (address) => {
+    setValue(address);
+    clearSuggestions();
+    // setShowSuggestions(false)
+    setTimeout(() => setValue(null), 10);
+
+    try {
+      const results = await getGeocode({ address });
+      const { lat, lng } = await getLatLng(results[0]);
+      panTo({ lat, lng });
+    } catch (error) {
+      console.log("😱 Error: ", error);
+    }
+  };
+  const { street_name, route, area, postal_code, city, country } =
+    selectedLocation;
+
+  return (
+    <div
+      className="search"
+      style={{
+        position: "relative",
+        width: "100%",
+      }}
+    >
+      <Input
+        value={value}
+        onChange={handleInput}
+        disabled={!ready}
+        placeholder="Search your location"
+        width="100%"
+      />
+
+      {showSuggestions && (
+        <ul
+          style={{
+            position: "absolute",
+            top: "22px",
+            left: "0",
+            background: "white",
+            height: "fit-content",
+            // width: "fit-content",
+            zIndex: "999",
+            padding: "8px",
+            borderRadius: "8px",
+            border: "1px solid #dedede",
+          }}
+        >
+          {status === "OK" &&
+            data.map((mapData) => (
+              // console.log(mapData,"map")
+              <li
+              key={mapData.id}
+                style={{
+                  listStyleType: "none",
+                }}
+                onClick={() => handleSelect(mapData.description)}
+              >
+                <button className="googleSearchLocationSuggest">
+                  {mapData.description}
+                </button>
+              </li>
+            ))}
+        </ul>
+      )}
+    </div>
+  );
+};
