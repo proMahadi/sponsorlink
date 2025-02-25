@@ -657,6 +657,7 @@ const ExploreForm = ({ onSubmit, loading }) => {
                         // }}
                       />
                       <Circle
+                      // key={`${marker.lat}-${marker.lng}`}
                         center={{ lat: marker.lat, lng: marker.lng }}
                         radius={sliderValues.radiusSlider}
                         options={circleOptions}

@@ -47,11 +47,11 @@ const options = {
   disableDefaultUI: true,
   zoomControl: true,
 };
-const circleOptions = {
-  // styles: mapStyles,
-  disableDefaultUI: true,
-  zoomControl: true,
-};
+// const circleOptions = {
+//   // styles: mapStyles,
+//   disableDefaultUI: true,
+//   zoomControl: true,
+// };
 // const myLocation =   navigator.geolocation.getCurrentPosition((position) => panTo({lat: position.coords.latitude,lng: position.coords.longitude,}));
 // const myLatitude =   navigator.geolocation.getCurrentPosition((position) => position.coords.latitude);
 
@@ -445,14 +445,24 @@ export default function RegiserForm({ User, setUser }) {
       <>
         <div
           className="profile-image-circle"
-          onClick={() => setIsModalOpen(true)}
+          // onClick={() => setIsModalOpen(true)}
           style={{
             backgroundImage: formData.profile_image
               ? `url(${formData.profile_image})`
               : "none",
+              position:"relative",
+              overflow:"hidden",
+              cursor:"pointer"
           }}
         >
           {!formData.profile_image && <Edit />}
+          <input type="file" style={{
+            position:"absolute",
+            height:"100%",
+            width:"100%",
+            opacity:"0",
+            cursor:"pointer"
+          }} />
         </div>
 
         <Modal visible={isModalOpen} onClose={() => setIsModalOpen(false)}>
@@ -665,15 +675,17 @@ export default function RegiserForm({ User, setUser }) {
                     //   scaledSize: new window.google.maps.Size(30, 30)
                     // }}
                   />
-                  <Circle
+                  {/* <Circle
+                  // key={`${marker.lat}-${marker.lng}`}
                     center={{ lat: marker.lat, lng: marker.lng }}
                     radius={100}
-                    options={circleOptions}
+                    // options={circleOptions}
+                    
                     onCenterChanged={() => console.log("onCenterChanged")}
                     onRadiusChanged={() => console.log("onRadiusChanged")}
                     min={50}
                     max={100}
-                  />
+                  /> */}
                 </>
               ))}
 
