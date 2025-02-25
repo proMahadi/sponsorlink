@@ -167,6 +167,9 @@ export default function RegiserForm({ User, setUser }) {
     country: "",
     address: "",
   });
+  const [searchLocationValue,setSearchLocationValue]=useState("")
+  const clickedLocation = markers.map((marker)=>marker)
+  // console.log(clickedLocation,"clickedLocation")
   console.log(markers, "selected lat lng");
   const { house,street_name, route, area, postal_code, city, country } =
     selectedLocation;
@@ -277,7 +280,36 @@ export default function RegiserForm({ User, setUser }) {
         time: new Date(),
       },
     ]);
+    // setSearchLocationValue( street_name, route, area, postal_code, city, country )
   }, []);
+
+//   const onMapClick = useCallback(async (e) => {
+//   const lat = e.latLng.lat();
+//   const lng = e.latLng.lng();
+
+//   console.log(lat, "latitude");
+//   console.log(lng, "longitude");
+
+//   setMarkers([
+//     {
+//       lat,
+//       lng,
+//       time: new Date(),
+//     },
+//   ]);
+
+//   try {
+//     // Reverse geocode to get the address
+//     const results = await getGeocode({ location: { lat, lng } });
+
+//     if (results.length > 0) {
+//       const address = results[0].formatted_address;
+//       setValue(address); // Update the search input
+//     }
+//   } catch (error) {
+//     console.log("Error getting address: ", error);
+//   }
+// }, []);
 
   const mapRef = useRef();
   const onMapLoad = useCallback((map) => {
@@ -608,7 +640,7 @@ export default function RegiserForm({ User, setUser }) {
                 gap: "16px",
               }}
             >
-              <Search selectedLocation={selectedLocation} panTo={panTo} />
+              <Search selectedLocation={selectedLocation} searchLocationValue={searchLocationValue} markers={markers} clickedLocation={clickedLocation} panTo={panTo} />
               <div
                 style={{
                   width: "100%",
@@ -1009,7 +1041,7 @@ export default function RegiserForm({ User, setUser }) {
   );
 }
 
-const Search = ({ panTo, selectedLocation }) => {
+const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clickedLocation}) => {
   const {
     ready,
     value,
@@ -1057,6 +1089,15 @@ const Search = ({ panTo, selectedLocation }) => {
   };
   const { street_name, route, area, postal_code, city, country } =
     selectedLocation;
+
+    
+
+    console.log(markers,"clicked location")
+
+//     useEffect(()=>{
+//       const {lat,lng} = clickedLocation
+// console.log(lat,lng,"mapClick")
+//     },[clickedLocation])
 
   return (
     <div
@@ -1109,3 +1150,16 @@ const Search = ({ panTo, selectedLocation }) => {
     </div>
   );
 };
+
+
+//   try {
+//     // Reverse geocode to get the address
+//     const results = await getGeocode({ location: { lat, lng } });
+
+//     if (results.length > 0) {
+//       const address = results[0].formatted_address;
+//       setValue(address); // Update the search input
+//     }
+//   } catch (error) {
+//     console.log("Error getting address: ", error);
+//   }
