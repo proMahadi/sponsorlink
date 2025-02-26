@@ -166,6 +166,8 @@ export default function PostModal({
     country: "",
     address: "",
   });
+      const [searchLocationValue,setSearchLocationValue]=useState("")
+      const clickedLocation = markers.map((marker)=>marker)
   console.log(markers, "selected lat lng");
   const { house, street_name, route, area, postal_code, city, country } =
     selectedLocation;
@@ -665,13 +667,13 @@ export default function PostModal({
               </div>
             </Collapse> */}
              <Collapse title="Distance" bordered>
-              <Search selectedLocation={selectedLocation} panTo={panTo} />
+             {/* <Search selectedLocation={selectedLocation} searchLocationValue={searchLocationValue} markers={markers} clickedLocation={clickedLocation} panTo={panTo} /> */}
               <Spacer h={1}></Spacer>
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
+                  // alignItems: "center",
                   gap: "14px",
                 }}
               >
@@ -684,7 +686,7 @@ export default function PostModal({
                   {...register("radius")}
                   width="100%"
                 />
-                <Input
+                {/* <Input
                   value={
                     house !== "" ||
                     street_name !== "" ||
@@ -703,7 +705,8 @@ export default function PostModal({
                     color: "black",
                   }}
                   onChange={onAddressChange}
-                />
+                /> */}
+                <Search selectedLocation={selectedLocation} searchLocationValue={searchLocationValue} markers={markers} clickedLocation={clickedLocation} panTo={panTo} />
               </div>
               <div
               style={{
@@ -871,7 +874,7 @@ export default function PostModal({
 }
 
 
-const Search = ({ panTo, selectedLocation }) => {
+const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clickedLocation}) => {
   const {
     ready,
     value,
@@ -920,6 +923,26 @@ const Search = ({ panTo, selectedLocation }) => {
   const { street_name, route, area, postal_code, city, country } =
     selectedLocation;
 
+      useEffect(() => {
+        const fetchAddress = async () => {
+          if (markers.length > 0) {
+            const lastMarker = markers[markers.length - 1]; // Get the latest marker
+            try {
+              const results = await getGeocode({ location: lastMarker });
+              if (results.length > 0) {
+                const address = results[0].formatted_address;
+                setValue(address); // Update the search input
+              }
+            } catch (error) {
+              console.log("Error getting address: ", error);
+            }
+          }
+        };
+    
+        fetchAddress();
+        setTimeout(() => setValue(null), 10);
+      }, [markers]); // Run effect when markers change
+
   return (
     <div
       className="search"
@@ -939,7 +962,7 @@ const Search = ({ panTo, selectedLocation }) => {
       {showSuggestions && (
         <ul
           style={{
-            position: "absolute",
+            // position: "absolute",
             top: "22px",
             left: "0",
             background: "white",

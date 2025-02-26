@@ -641,7 +641,7 @@ export default function RegiserForm({ User, setUser }) {
               }}
             >
               <Search selectedLocation={selectedLocation} searchLocationValue={searchLocationValue} markers={markers} clickedLocation={clickedLocation} panTo={panTo} />
-              <div
+              {/* <div
                 style={{
                   width: "100%",
                   display: "flex",
@@ -680,7 +680,7 @@ export default function RegiserForm({ User, setUser }) {
                   width="100%"
                   // {...register("country")}
                 />
-              </div>
+              </div> */}
             </div>
 
             <GoogleMap
@@ -1092,12 +1092,41 @@ const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clicked
 
     
 
-    console.log(markers,"clicked location")
 
-//     useEffect(()=>{
-//       const {lat,lng} = clickedLocation
-// console.log(lat,lng,"mapClick")
-//     },[clickedLocation])
+  //   useEffect(async()=>{
+  // try {
+  //   // Reverse geocode to get the address
+  //   const results = await getGeocode({ location: { lat, lng } });
+
+  //   if (results.length > 0) {
+  //     const address = results[0].formatted_address;
+  //     setValue(address); // Update the search input
+  //   }
+  // } catch (error) {
+  //   console.log("Error getting address: ", error);
+  // }
+  //   },[clickedLocation])
+
+  useEffect(() => {
+    const fetchAddress = async () => {
+      if (markers.length > 0) {
+        const lastMarker = markers[markers.length - 1]; // Get the latest marker
+        try {
+          const results = await getGeocode({ location: lastMarker });
+          if (results.length > 0) {
+            const address = results[0].formatted_address;
+            setValue(address); // Update the search input
+          }
+        } catch (error) {
+          console.log("Error getting address: ", error);
+        }
+      }
+    };
+
+    fetchAddress();
+    setTimeout(() => setValue(null), 10);
+  }, [markers]); // Run effect when markers change
+
 
   return (
     <div
@@ -1108,7 +1137,7 @@ const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clicked
       }}
     >
       <Input
-        value={value}
+        value={value||""}
         onChange={handleInput}
         disabled={!ready}
         placeholder="Search your location"
