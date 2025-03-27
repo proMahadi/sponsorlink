@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { login } from '@/api/user'
 import { useAuthContext } from '@/context/AuthContext'
+import { isAxiosError } from 'axios'
 
 const LoginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -64,11 +65,19 @@ export default function Login({}) {
   const onSubmit = async ({ username, password }) => {
     if (isLoading) return
 
-    const data = await login(username, password)
-    setAuth(data.user_info, data.access, data.refresh)
+    try {
+      const data = await login(username, password)
+      setAuth(data.user_info, data.access, data.refresh)
 
-    navigate('/')
-    setError('root', { type: 'manual', message: '' })
+      navigate('/')
+      setError('root', { message: '' })
+    } catch (err) {
+      if (isAxiosError(err)) {
+        setError('root', {
+          message: err?.response?.data?.detail ?? err?.response?.data?.error,
+        })
+      }
+    }
 
     // const users = JSON.parse(localStorage.getItem('users') || '[]')
     // const user = users.find((u) => u.email === email && u.password === password)

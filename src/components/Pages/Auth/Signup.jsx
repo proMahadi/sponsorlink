@@ -6,22 +6,23 @@ import { FcGoogle } from 'react-icons/fc'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { login, signup } from '@/api/user'
+import { useAuthContext } from '@/context/AuthContext'
+import { isAxiosError } from 'axios'
 
 const SignupSchema = z.object({
   email: z.string().email('invalid email address').min(1, 'email is required'),
-  password: z
-    .string()
-    .min((length = 8), 'password length should be more then 8'),
+  password: z.string().min(4, 'password length should be more then 4'),
 })
 
 export default function Signup() {
-  return 'Hello World'
-
   const navigate = useNavigate()
   // const [email, setEmail] = useState("");
   // const [password, setPassword] = useState("");
   // const [error, setError] = useState("");
   // const [isLoading, setIsLoading] = useState(false);
+
+  const { setAuth } = useAuthContext()
 
   const {
     register,
@@ -36,96 +37,26 @@ export default function Signup() {
     resolver: zodResolver(SignupSchema),
   })
 
-  // const handleSignup = async () => {
-  //   if (isLoading) return;
-
-  //   // setIsLoading(true);
-  //   setError("");
-
-  //   const users = JSON.parse(localStorage.getItem("users") || "[]");
-
-  //   if (users.some((user) => user.email === email)) {
-  //     setError("You are already a member");
-  //     // setIsLoading(false);
-  //     return;
-  //   }
-
-  //   // Add 1.5 second delay
-  //   await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  //   const userId = crypto.randomUUID();
-  //   users.push({ id: userId, email, password, hasRegistered: false });
-  //   localStorage.setItem("users", JSON.stringify(users));
-  //   setUser({ id: userId, email, password, hasRegistered: false });
-  //   sessionStorage.setItem(
-  //     "user",
-  //     JSON.stringify({ id: userId, email, password, hasRegistered: false })
-  //   );
-  //   sessionStorage.setItem("isAuthenticated", "true");
-  //   setIsAuthenticated(true);
-  //   navigate("/");
-  // };
-
-  // const onSubmit = async () => {
-  //   if (isLoading) return;
-
-  //   setError("");
-
-  //   const users = JSON.parse(localStorage.getItem("users") || "[]");
-
-  //   if (users.some((user) => user.email === email)) {
-  //     setError("root", {
-  //       message: "You are already a member",
-  //     });
-
-  //     return;
-  //   }
-
-  //   // Add 1.5 second delay
-  //   await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  //   const userId = crypto.randomUUID();
-  //   users.push({ id: userId, email, password, hasRegistered: false });
-  //   localStorage.setItem("users", JSON.stringify(users));
-  //   setUser({ id: userId, email, password, hasRegistered: false });
-  //   sessionStorage.setItem(
-  //     "user",
-  //     JSON.stringify({ id: userId, email, password, hasRegistered: false })
-  //   );
-  //   sessionStorage.setItem("isAuthenticated", "true");
-  //   setIsAuthenticated(true);
-  //   navigate("/");
-  // };
-  const onSubmit = async (data) => {
-    console.log(data)
-    const { email, password } = data
-
+  const onSubmit = async ({ email, password }) => {
     if (isLoading) return
 
-    setError('root', { type: 'manual', message: '' })
+    try {
+      const loginRes = await signup(email, password)
+      setAuth(loginRes.user_info, loginRes.access, loginRes.refresh)
 
-    const users = JSON.parse(localStorage.getItem('users') || '[]')
-
-    if (users.some((user) => user.email === email)) {
-      setError('root', { type: 'manual', message: 'You are already a member' })
-      return
+      navigate('/')
+    } catch (err) {
+      if (isAxiosError(err)) {
+        setError('email', { message: err.response?.data?.email?.[0] })
+        setError('password', { message: err.response?.data?.password?.[0] })
+        setError('root', {
+          message: err?.response?.data?.detail ?? err?.response?.data?.error,
+        })
+      } else {
+        console.log(err)
+        setError('root', { message: 'An error occurred' })
+      }
     }
-
-    // Simulate a delay
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    const userId = crypto.randomUUID()
-    users.push({ id: userId, email, password, hasRegistered: false })
-    localStorage.setItem('users', JSON.stringify(users))
-
-    setUser({ id: userId, email, password, hasRegistered: false })
-    sessionStorage.setItem(
-      'user',
-      JSON.stringify({ id: userId, email, password, hasRegistered: false })
-    )
-    sessionStorage.setItem('isAuthenticated', 'true')
-    setIsAuthenticated(true)
-    navigate('/')
   }
 
   return (
@@ -178,6 +109,20 @@ export default function Signup() {
             )}
           </div>
           <Spacer h={0.1} inline></Spacer>
+
+          {errors.root && (
+            <>
+              <p
+                style={{
+                  color: 'red',
+                  fontSize: '12px',
+                }}
+              >
+                {errors.root.message}
+              </p>
+            </>
+          )}
+
           <Button
             htmlType="submit"
             className="signup-btn"
