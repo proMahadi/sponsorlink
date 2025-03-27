@@ -10,6 +10,7 @@ import { Grid, List, Plus } from '@geist-ui/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import Footer from '@/components/Footer/Footer'
 import ExploreForm from '@/components/Forms/ExploreForm'
+import { getListings } from '@/api/listings'
 
 const API_URL =
   'https://sponsorlink-backend.up.railway.app/api/bayes/getOrderedUsers/'
@@ -87,7 +88,7 @@ export default function Explore() {
     const endIndex = state.currentPage * parseInt(state.itemsPerPage)
     setState((prev) => ({
       ...prev,
-      displayedItems: prev.listings.slice(0, endIndex),
+      displayedItems: prev.listings?.slice(0, endIndex),
     }))
   }, [state.listings, state.currentPage, state.itemsPerPage])
 
@@ -99,22 +100,26 @@ export default function Explore() {
       isApply: false,
       origin: 'search',
       description: 'This is a sample search query',
-      tags: formData.tags.map((tag) => ({ name: tag, slider: 0.5 })),
-      specializedTags: formData.specializedTags.map((tag) => ({
+      tags: formData?.tags?.map((tag) => ({ name: tag, slider: 0.5 })),
+      specializedTags: formData?.specializedTags?.map?.((tag) => ({
         name: tag.trim(),
         slider: 0.5,
       })), // Example slider value
     }
 
     try {
-      const response = await axios.post(API_URL, dataToSubmit)
-      const formattedListings = formatListingsData(response.data)
-      localStorage.setItem('exploreListings', JSON.stringify(formattedListings))
-      sessionStorage.setItem('hasExplored', 'true')
+      const listings = await getListings()
+      console.log('Listings:', listings)
+
+      // const response = await axios.post(API_URL, dataToSubmit)
+      // const formattedListings = formatListingsData(response.data)
+      // localStorage.setItem('exploreListings', JSON.stringify(formattedListings))
+      // sessionStorage.setItem('hasExplored', 'true')
 
       setState((prev) => ({
         ...prev,
-        listings: formattedListings,
+        listings: listings.results,
+        // showDetailsPage: true,
         hasExplored: true,
         isLoading: false,
       }))
@@ -235,95 +240,117 @@ export default function Explore() {
         <Sidebar hasSidebar={false} />
         <div className="Explore">
           {!state.showDetailsPage && (
-            <>
-              {!state.hasExplored ? (
-                <div className="explore-container">
+            <div className={state.hasExplored ? 'explore-grid-container' : ''}>
+              <div className="explore-container">
+                <div
+                  style={{
+                    top: 85,
+                    position: state.hasExplored ? 'sticky' : 'static',
+                  }}
+                >
                   <ExploreForm
                     onSubmit={handleExplore}
                     loading={state.isLoading}
                   />
                 </div>
-              ) : (
-                <>
-                  <div className="explore-header">
-                    <div className="explore-dash">
-                      <div className="dash-left">
-                        <Select initialValue="1">
-                          <Select.Option value="1">
-                            Sort by Relevance
-                          </Select.Option>
-                          <Select.Option value="2">
-                            Sort by Distance
-                          </Select.Option>
-                        </Select>
+              </div>
+
+              {state.hasExplored &&
+                (state.isLoading ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '3rem',
+                      fontWeight: '500',
+                    }}
+                  >
+                    Loading...
+                  </div>
+                ) : (
+                  <div>
+                    <div className="explore-header">
+                      <div className="explore-dash">
+                        <div className="dash-left">
+                          <Select initialValue="1">
+                            <Select.Option value="1">
+                              Sort by Relevance
+                            </Select.Option>
+                            <Select.Option value="2">
+                              Sort by Distance
+                            </Select.Option>
+                          </Select>
+                          <Button
+                            onClick={handleNewSearch}
+                            scale={0.8}
+                            width="20%"
+                          >
+                            Filters
+                          </Button>
+                        </div>
+                        <div className="dash-right">
+                          <div className="view-toggle">
+                            <Grid
+                              size={16}
+                              onClick={() =>
+                                setState((prev) => ({
+                                  ...prev,
+                                  viewMode: 'grid',
+                                }))
+                              }
+                              className={
+                                state.viewMode === 'grid' ? 'active' : ''
+                              }
+                            />
+                            <List
+                              size={16}
+                              onClick={() =>
+                                setState((prev) => ({
+                                  ...prev,
+                                  viewMode: 'list',
+                                }))
+                              }
+                              className={
+                                state.viewMode === 'list' ? 'active' : ''
+                              }
+                            />
+                          </div>
+                          {/* <Button onClick={handleNewSearch} style={{fontWeight: '500'}} type="secondary-light" iconRight={<Plus />} auto>
+                      New Search
+                    </Button> */}
+                        </div>
+                      </div>
+                      <div className="explore-title">
+                        {state.listings.length} Results found
+                      </div>
+                    </div>
+
+                    <div
+                      className={
+                        state.viewMode === 'grid' ? 'grid-auto' : 'list-auto'
+                      }
+                    >
+                      {renderedListings}
+                    </div>
+
+                    {state.displayedItems.length < state.listings.length && (
+                      <div style={{ textAlign: 'center', margin: '20px 0' }}>
                         <Button
-                          onClick={handleNewSearch}
-                          scale={0.8}
-                          width="20%"
+                          onClick={() =>
+                            setState((prev) => ({
+                              ...prev,
+                              currentPage: prev.currentPage + 1,
+                            }))
+                          }
                         >
-                          Filters
+                          Load More
                         </Button>
                       </div>
-                      <div className="dash-right">
-                        <div className="view-toggle">
-                          <Grid
-                            size={16}
-                            onClick={() =>
-                              setState((prev) => ({
-                                ...prev,
-                                viewMode: 'grid',
-                              }))
-                            }
-                            className={
-                              state.viewMode === 'grid' ? 'active' : ''
-                            }
-                          />
-                          <List
-                            size={16}
-                            onClick={() =>
-                              setState((prev) => ({
-                                ...prev,
-                                viewMode: 'list',
-                              }))
-                            }
-                            className={
-                              state.viewMode === 'list' ? 'active' : ''
-                            }
-                          />
-                        </div>
-                        {/* <Button onClick={handleNewSearch} style={{fontWeight: '500'}} type="secondary-light" iconRight={<Plus />} auto>
-                        New Search
-                      </Button> */}
-                      </div>
-                    </div>
-                    <div className="explore-title">
-                      {state.listings.length} Results found
-                    </div>
+                    )}
                   </div>
-                  <div
-                    className={
-                      state.viewMode === 'grid' ? 'grid-auto' : 'list-auto'
-                    }
-                  >
-                    {renderedListings}
-                  </div>
-                  {state.displayedItems.length < state.listings.length && (
-                    <div style={{ textAlign: 'center', margin: '20px 0' }}>
-                      <Button
-                        onClick={() =>
-                          setState((prev) => ({
-                            ...prev,
-                            currentPage: prev.currentPage + 1,
-                          }))
-                        }
-                      >
-                        Load More
-                      </Button>
-                    </div>
-                  )}
-                </>
-              )}
-            </>
+                ))}
+            </div>
           )}
 
           {/* Add the ApplicationModal component */}

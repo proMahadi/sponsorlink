@@ -2,6 +2,12 @@
     padding: 0.8rem;
 }
 
+.explore-grid-container{
+  display: grid; 
+  grid-template-columns: 500px 1fr;
+  gap: 2rem;
+}
+
 .explore-container {
     min-height: calc(100vh - var(--header-height));
     display: flex;
