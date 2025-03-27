@@ -100,7 +100,7 @@ export default function Explore() {
       origin: 'search',
       description: 'This is a sample search query',
       tags: formData.tags.map((tag) => ({ name: tag, slider: 0.5 })),
-      specializedTags: formData.specializedTags.map((tag) => ({
+      specializedTags: formData.specializedTags?.map?.((tag) => ({
         name: tag.trim(),
         slider: 0.5,
       })), // Example slider value
