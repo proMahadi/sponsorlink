@@ -4,36 +4,47 @@ import { createContext, useContext, useEffect, useState } from 'react'
 
 export const AuthContext = createContext({
   user: {},
+  profile: {},
   accessToken: '',
   refreshToken: '',
   isAuthenticated: false,
   logout: () => {},
-  setAuth: (user, accessToken, refreshToken) => {},
+  setUser: (user) => {},
+  setProfile: (profile) => {},
+  setToken: (accessToken, refreshToken) => {},
+  setAuth: (user, profile, accessToken, refreshToken) => {},
 })
 
 export function AuthContextProvider({ children }) {
   const [isLoading, setIsLoading] = useState(false)
 
   const [user, setUser] = useState({})
+  const [profile, setProfile] = useState({})
+
   const [accessToken, setAccessToken] = useState('')
   const [refreshToken, setRefreshToken] = useState(
     localStorage.getItem('refreshToken') ?? ''
   )
 
+  function setAuth(user, profile, accessToken, refreshToken) {
+    setUser(user)
+    setProfile(profile)
+    setAccessToken(accessToken)
+    setRefreshToken(refreshToken)
+
+    localStorage.setItem('refreshToken', refreshToken)
+
+    clientAxios.defaults.headers.common[
+      'Authorization'
+    ] = `Bearer ${accessToken}`
+  }
+
   useEffect(() => {
     if (refreshToken && !accessToken) {
       setIsLoading(true)
       refetchToken(refreshToken)
-        .then(({ access, user_info, refresh }) => {
-          setUser(user_info)
-          setAccessToken(access)
-          setRefreshToken(refresh)
-
-          localStorage.setItem('refreshToken', refresh)
-
-          clientAxios.defaults.headers.common[
-            'Authorization'
-          ] = `Bearer ${access}`
+        .then(({ access, user_info, profile, refresh }) => {
+          setAuth(user_info, profile, access, refresh)
         })
         .catch(() => {})
         .finally(() => setIsLoading(false))
@@ -44,6 +55,7 @@ export function AuthContextProvider({ children }) {
     <AuthContext.Provider
       value={{
         user,
+        profile,
         accessToken,
         refreshToken,
         isAuthenticated: !!(accessToken && refreshToken),
@@ -56,17 +68,9 @@ export function AuthContextProvider({ children }) {
 
           clientAxios.defaults.headers.common['Authorization'] = ''
         },
-        setAuth(user, accessToken, refreshToken) {
-          setUser(user)
-          setAccessToken(accessToken)
-          setRefreshToken(refreshToken)
-
-          localStorage.setItem('refreshToken', refreshToken)
-
-          clientAxios.defaults.headers.common[
-            'Authorization'
-          ] = `Bearer ${accessToken}`
-        },
+        setUser,
+        setProfile,
+        setAuth,
       }}
     >
       {isLoading ? (

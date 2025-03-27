@@ -31,3 +31,10 @@ export async function refreshToken(token) {
 
   return data
 }
+
+export async function updateProfile(user, profile) {
+  await clientAxios.patch('/account/update-profile/', {
+    user,
+    profile,
+  })
+}

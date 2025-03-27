@@ -50,7 +50,7 @@ import { Mail, Search, Info } from '@geist-ui/icons'
 import { useAuthContext } from './context/AuthContext'
 
 function App() {
-  const { isAuthenticated, user } = useAuthContext()
+  const { isAuthenticated, profile } = useAuthContext()
 
   const [, desktop] = useWindowSize()
   const [isOpen, setIsOpen] = useState(false)
@@ -128,11 +128,8 @@ function App() {
           </>
         ) : (
           <>
-            {user.hasRegistered ? (
-              <>
-                {/* TODO: What is this */}
-                {/* <RegisterForm User={User} setUser={setUser} /> */}
-              </>
+            {profile.is_first_time ? (
+              <RegisterForm />
             ) : (
               <Routes>
                 <Route path="/" element={<Navigate to="/explore" replace />} />

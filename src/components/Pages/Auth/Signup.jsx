@@ -41,8 +41,8 @@ export default function Signup() {
     if (isLoading) return
 
     try {
-      const loginRes = await signup(email, password)
-      setAuth(loginRes.user_info, loginRes.access, loginRes.refresh)
+      const data = await signup(email, password)
+      setAuth(data.user_info, data.profile, data.access, data.refresh)
 
       navigate('/')
     } catch (err) {
