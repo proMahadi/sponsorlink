@@ -1,16 +1,17 @@
-import { Input, Button, Divider, Spacer } from "@geist-ui/core";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
-import "@/styles/Auth.css";
-import { FcGoogle } from "react-icons/fc";
-import { useForm } from "react-hook-form";
-import {z} from "zod"
-import {zodResolver} from "@hookform/resolvers/zod"
+import { Input, Button, Divider, Spacer } from '@geist-ui/core'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { useState } from 'react'
+import '@/styles/Auth.css'
+import { FcGoogle } from 'react-icons/fc'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { login } from '@/api/user'
+import { useAuthContext } from '@/context/AuthContext'
 
-
-const LoginSchema= z.object({
-  email:z.string().email("invalid email address").min(1,"email is required"),
-  password: z.string().min(length=8,"password length should be more then 8"),
+const LoginSchema = z.object({
+  username: z.string().min(1, 'Username is required'),
+  password: z.string().min(4, 'password length should be more then 8'),
 })
 
 export default function Login({
@@ -19,7 +20,9 @@ export default function Login({
   isAuthenticated,
   setIsAuthenticated,
 }) {
-  const navigate = useNavigate();
+  const { setAccessToken, user } = useAuthContext()
+
+  const navigate = useNavigate()
   const {
     register,
     formState: { isLoading, errors, isSubmitting },
@@ -27,11 +30,11 @@ export default function Login({
     setError,
   } = useForm({
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
-    resolver:zodResolver(LoginSchema)
-  });
+    resolver: zodResolver(LoginSchema),
+  })
   // const [email, setEmail] = useState("");
   // const [password, setPassword] = useState("");
   // const [error, setError] = useState("");
@@ -63,33 +66,35 @@ export default function Login({
 
   //   setIsLoading(false);
   // };
-  const onSubmit = async (data) => {
-    const { email, password } = data;
-    if (isLoading) return;
+  const onSubmit = async ({ username, password }) => {
+    if (isLoading) return
 
-    setError("root", { type: "manual", message: "" });
+    const data = await login(username, password)
 
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const user = users.find(
-      (u) => u.email === email && u.password === password
-    );
+    setUser(data.user_info)
+    setAccessToken(data.access)
 
-    // Add 1.5 second delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // setError('root', { type: 'manual', message: '' })
 
-    if (user) {
-      setUser(user);
-      sessionStorage.setItem("user", JSON.stringify(user));
-      setIsAuthenticated(true);
-      sessionStorage.setItem("isAuthenticated", "true");
-      navigate("/");
-    } else {
-      setError("root", {
-        type: "manual",
-        message: "Invalid email or password",
-      });
-    }
-  };
+    // const users = JSON.parse(localStorage.getItem('users') || '[]')
+    // const user = users.find((u) => u.email === email && u.password === password)
+
+    // // Add 1.5 second delay
+    // await new Promise((resolve) => setTimeout(resolve, 1500))
+
+    // if (user) {
+    //   setUser(user)
+    //   sessionStorage.setItem('user', JSON.stringify(user))
+    //   setIsAuthenticated(true)
+    //   sessionStorage.setItem('isAuthenticated', 'true')
+    //   navigate('/')
+    // } else {
+    //   setError('root', {
+    //     type: 'manual',
+    //     message: 'Invalid email or password',
+    //   })
+    // }
+  }
 
   return (
     <div className="auth-wrapper">
@@ -106,17 +111,17 @@ export default function Login({
                 // value={email}
                 // onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-                width={"100%"}
-                {...register("email")}
+                width={'100%'}
+                {...register('username')}
               />
-              {errors.email && (
+              {errors.username && (
                 <p
                   style={{
-                    color: "red",
-                    fontSize: "12px",
+                    color: 'red',
+                    fontSize: '12px',
                   }}
                 >
-                  {errors.email.message}
+                  {errors.username.message}
                 </p>
               )}
             </div>
@@ -126,14 +131,14 @@ export default function Login({
                 // value={password}
                 // onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                width={"100%"}
-                {...register("password")}
+                width={'100%'}
+                {...register('password')}
               />
               {errors.password && (
                 <p
                   style={{
-                    color: "red",
-                    fontSize: "12px",
+                    color: 'red',
+                    fontSize: '12px',
                   }}
                 >
                   {errors.password.message}
@@ -161,7 +166,7 @@ export default function Login({
           {errors.root ? (
             <div
               style={{
-                color: "red",
+                color: 'red',
               }}
             >
               {errors.root.message}
@@ -173,7 +178,7 @@ export default function Login({
             <Button
               // style={{ width: "fit-content" }}
               scale={0.7}
-              onClick={() => navigate("/signup")}
+              onClick={() => navigate('/signup')}
               disabled={isLoading}
             >
               Sign up
@@ -192,5 +197,5 @@ export default function Login({
         </div>
       </div>
     </div>
-  );
+  )
 }
