@@ -14,8 +14,10 @@ const CustomSelect = ({
   tagChoices,
   formData,
   handleAddNewTag,
-  isSearchedTagFound
+  isSearchedTagFound,
 }) => {
+  console.dir(formDataTags, { depth: null });
+
   const [showOptions, setShowOptions] = useState(false);
   const [addedTags, setAddedTags] = useState([]);
   const allAddedTags = [...new Set(addedTags)];
@@ -67,10 +69,11 @@ const CustomSelect = ({
               maxWidth: "350px",
             }}
           >
-            {allAddedTags.map((singleAddedTag) => {
+            {allAddedTags?.map((singleAddedTag) => {
               const exactTag = tagChoices.find(
-                (choice) => choice.id === singleAddedTag
+                (choice) => String(choice.id) === String(singleAddedTag)
               );
+
               // console.log(exactTag.label);
               return (
                 <span
@@ -84,7 +87,7 @@ const CustomSelect = ({
                   }}
                   {...register("tags")}
                 >
-                  {exactTag.label}
+                  {exactTag?.name}
                   <RxCross2
                     onClick={(e) => handleDeleteTag(e, singleAddedTag)}
                   />
@@ -124,20 +127,20 @@ const CustomSelect = ({
               <p style={{ fontSize: "12px" }}>this tag is not found !</p>
             )}
             {formDataTags.length > 0
-              ? formData.tags.map((tag) => (
+              ? formDataTags?.map((tag) => (
                   <div
-                    onClick={() => handleAddTag(tag.id)}
+                    onClick={() => handleAddTag(String(tag.id))}
                     className="singleOption"
                   >
-                    <p>{tag.label}</p>
+                    <p>{tag.name}</p>
                   </div>
                 ))
-              : tagChoices.map((choice) => (
+              : tagChoices?.map((choice) => (
                   <div
-                    onClick={() => handleAddTag(choice.id)}
+                    onClick={() => handleAddTag(String(choice.id))}
                     className="singleOption"
                   >
-                    <p>{choice.label}</p>
+                    <p>{choice.name}</p>
                   </div>
                 ))}
           </div>
