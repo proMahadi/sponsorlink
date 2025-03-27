@@ -128,7 +128,7 @@ function App() {
           </>
         ) : (
           <>
-            {profile.is_first_time ? (
+            {!profile.is_first_time ? (
               <RegisterForm />
             ) : (
               <Routes>
