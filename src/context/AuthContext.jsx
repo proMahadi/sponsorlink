@@ -6,6 +6,8 @@ export const AuthContext = createContext({
   user: {},
   accessToken: '',
   refreshToken: '',
+  isAuthenticated: false,
+  logout: () => {},
   setToken: (user, accessToken, refreshToken) => {},
 })
 
@@ -38,6 +40,16 @@ export function AuthContextProvider({ children }) {
         user,
         accessToken,
         refreshToken,
+        isAuthenticated: !!(accessToken && refreshToken),
+        logout() {
+          setUser({})
+          setAccessToken('')
+          setRefreshToken('')
+
+          localStorage.removeItem('refreshToken')
+
+          clientAxios.defaults.headers.common['Authorization'] = ''
+        },
         setAuth(user, accessToken, refreshToken) {
           setUser(user)
           setAccessToken(accessToken)
