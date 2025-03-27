@@ -20,7 +20,7 @@ export default function Login({
   isAuthenticated,
   setIsAuthenticated,
 }) {
-  const { setAccessToken, user } = useAuthContext()
+  const { setAuth, user, accessToken, refreshToken } = useAuthContext()
 
   const navigate = useNavigate()
   const {
@@ -70,9 +70,7 @@ export default function Login({
     if (isLoading) return
 
     const data = await login(username, password)
-
-    setUser(data.user_info)
-    setAccessToken(data.access)
+    setAuth(data.user_info, data.access, data.refresh)
 
     // setError('root', { type: 'manual', message: '' })
 
