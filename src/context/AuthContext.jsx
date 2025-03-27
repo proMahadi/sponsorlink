@@ -8,10 +8,12 @@ export const AuthContext = createContext({
   refreshToken: '',
   isAuthenticated: false,
   logout: () => {},
-  setToken: (user, accessToken, refreshToken) => {},
+  setAuth: (user, accessToken, refreshToken) => {},
 })
 
 export function AuthContextProvider({ children }) {
+  const [isLoading, setIsLoading] = useState(false)
+
   const [user, setUser] = useState({})
   const [accessToken, setAccessToken] = useState('')
   const [refreshToken, setRefreshToken] = useState(
@@ -20,17 +22,21 @@ export function AuthContextProvider({ children }) {
 
   useEffect(() => {
     if (refreshToken && !accessToken) {
-      refetchToken(refreshToken).then(({ access, user_info, refresh }) => {
-        setUser(user_info)
-        setAccessToken(access)
-        setRefreshToken(refresh)
+      setIsLoading(true)
+      refetchToken(refreshToken)
+        .then(({ access, user_info, refresh }) => {
+          setUser(user_info)
+          setAccessToken(access)
+          setRefreshToken(refresh)
 
-        localStorage.setItem('refreshToken', refresh)
+          localStorage.setItem('refreshToken', refresh)
 
-        clientAxios.defaults.headers.common[
-          'Authorization'
-        ] = `Bearer ${access}`
-      })
+          clientAxios.defaults.headers.common[
+            'Authorization'
+          ] = `Bearer ${access}`
+        })
+        .catch(() => {})
+        .finally(() => setIsLoading(false))
     }
   }, [accessToken, refreshToken])
 
@@ -63,7 +69,21 @@ export function AuthContextProvider({ children }) {
         },
       }}
     >
-      {children}
+      {isLoading ? (
+        <div
+          style={{
+            inset: 0,
+            position: 'fixed',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <h1>Loading...</h1>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   )
 }

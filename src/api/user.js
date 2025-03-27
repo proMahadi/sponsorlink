@@ -15,6 +15,15 @@ export async function login(username, password) {
   return data
 }
 
+export async function signup(username, password) {
+  await clientAxios.post('/account/sign-up/', {
+    username,
+    password,
+  })
+
+  return login(username, password)
+}
+
 export async function refreshToken(token) {
   const { data } = await clientAxios.post('/token/refresh/', {
     refresh: token,

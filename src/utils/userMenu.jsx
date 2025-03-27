@@ -73,8 +73,8 @@ export default function UserMenu() {
       {menuVisible && (
         <div className="user-menu" ref={menuRef}>
           <div className="user-identity">
-            <div className="user-name">Charlie McGuire</div>
-            <div className="user-email">charliemcguirex5@gmail.com</div>
+            <div className="user-name">{user.username}</div>
+            <div className="user-email">{user.email}</div>
           </div>
 
           <div className="menu-divider mobile-only"></div>
