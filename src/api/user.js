@@ -14,3 +14,11 @@ export async function login(username, password) {
 
   return data
 }
+
+export async function refreshToken(token) {
+  const { data } = await clientAxios.post('/token/refresh/', {
+    refresh: token,
+  })
+
+  return data
+}

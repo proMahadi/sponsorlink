@@ -1,24 +1,54 @@
-import { createContext, useContext, useState } from 'react'
+import clientAxios from '@/api/axios'
+import { refreshToken as refetchToken } from '@/api/user'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 export const AuthContext = createContext({
   user: {},
-  setUser: (suer) => {},
-
   accessToken: '',
-  setAccessToken: (token) => {},
+  refreshToken: '',
+  setToken: (user, accessToken, refreshToken) => {},
 })
 
 export function AuthContextProvider({ children }) {
   const [user, setUser] = useState({})
   const [accessToken, setAccessToken] = useState('')
+  const [refreshToken, setRefreshToken] = useState(
+    localStorage.getItem('refreshToken') ?? ''
+  )
+
+  useEffect(() => {
+    if (refreshToken && !accessToken) {
+      refetchToken(refreshToken).then(({ access, user_info, refresh }) => {
+        setUser(user_info)
+        setAccessToken(access)
+        setRefreshToken(refresh)
+
+        localStorage.setItem('refreshToken', refresh)
+
+        clientAxios.defaults.headers.common[
+          'Authorization'
+        ] = `Bearer ${access}`
+      })
+    }
+  }, [accessToken, refreshToken])
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        setUser,
         accessToken,
-        setAccessToken,
+        refreshToken,
+        setAuth(user, accessToken, refreshToken) {
+          setUser(user)
+          setAccessToken(accessToken)
+          setRefreshToken(refreshToken)
+
+          localStorage.setItem('refreshToken', refreshToken)
+
+          clientAxios.defaults.headers.common[
+            'Authorization'
+          ] = `Bearer ${accessToken}`
+        },
       }}
     >
       {children}
