@@ -1,25 +1,23 @@
-import { Input, Button, Divider, Spacer } from "@geist-ui/core";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
-import "@/styles/Auth.css";
-import { FcGoogle } from "react-icons/fc";
-import { useForm } from "react-hook-form";
-import {z} from "zod"
-import {zodResolver} from "@hookform/resolvers/zod"
+import { Input, Button, Divider, Spacer } from '@geist-ui/core'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { useState } from 'react'
+import '@/styles/Auth.css'
+import { FcGoogle } from 'react-icons/fc'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-
-const SignupSchema= z.object({
-  email:z.string().email("invalid email address").min(1,"email is required"),
-  password: z.string().min(length=8,"password length should be more then 8"),
+const SignupSchema = z.object({
+  email: z.string().email('invalid email address').min(1, 'email is required'),
+  password: z
+    .string()
+    .min((length = 8), 'password length should be more then 8'),
 })
 
-export default function Signup({
-  User,
-  setUser,
-  isAuthenticated,
-  setIsAuthenticated,
-}) {
-  const navigate = useNavigate();
+export default function Signup() {
+  return 'Hello World'
+
+  const navigate = useNavigate()
   // const [email, setEmail] = useState("");
   // const [password, setPassword] = useState("");
   // const [error, setError] = useState("");
@@ -32,11 +30,11 @@ export default function Signup({
     setError,
   } = useForm({
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
-    resolver:zodResolver(SignupSchema)
-  });
+    resolver: zodResolver(SignupSchema),
+  })
 
   // const handleSignup = async () => {
   //   if (isLoading) return;
@@ -98,35 +96,37 @@ export default function Signup({
   //   setIsAuthenticated(true);
   //   navigate("/");
   // };
-  const onSubmit= async (data) => {
+  const onSubmit = async (data) => {
     console.log(data)
-    const { email, password } = data;
-  
-    if (isLoading) return;
-  
-    setError("root", { type: "manual", message: "" });
-  
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-  
+    const { email, password } = data
+
+    if (isLoading) return
+
+    setError('root', { type: 'manual', message: '' })
+
+    const users = JSON.parse(localStorage.getItem('users') || '[]')
+
     if (users.some((user) => user.email === email)) {
-      setError("root", { type: "manual", message: "You are already a member" });
-      return;
+      setError('root', { type: 'manual', message: 'You are already a member' })
+      return
     }
-  
+
     // Simulate a delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-  
-    const userId = crypto.randomUUID();
-    users.push({ id: userId, email, password, hasRegistered: false });
-    localStorage.setItem("users", JSON.stringify(users));
-  
-    setUser({ id: userId, email, password, hasRegistered: false });
-    sessionStorage.setItem("user", JSON.stringify({ id: userId, email, password, hasRegistered: false }));
-    sessionStorage.setItem("isAuthenticated", "true");
-    setIsAuthenticated(true);
-    navigate("/");
-  };
-  
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+
+    const userId = crypto.randomUUID()
+    users.push({ id: userId, email, password, hasRegistered: false })
+    localStorage.setItem('users', JSON.stringify(users))
+
+    setUser({ id: userId, email, password, hasRegistered: false })
+    sessionStorage.setItem(
+      'user',
+      JSON.stringify({ id: userId, email, password, hasRegistered: false })
+    )
+    sessionStorage.setItem('isAuthenticated', 'true')
+    setIsAuthenticated(true)
+    navigate('/')
+  }
 
   return (
     <div className="auth-wrapper">
@@ -138,18 +138,18 @@ export default function Signup({
         <form onSubmit={handleSubmit(onSubmit)}>
           <div>
             <Input
-              width={"100%"}
+              width={'100%'}
               placeholder="Email"
               // value={email}
               // onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
-              {...register("email")}
+              {...register('email')}
             />
             {errors.email && (
               <p
                 style={{
-                  color: "red",
-                  fontSize: "12px",
+                  color: 'red',
+                  fontSize: '12px',
                 }}
               >
                 {errors.email.message}
@@ -159,18 +159,18 @@ export default function Signup({
           <Spacer h={0.01} inline></Spacer>
           <div>
             <Input.Password
-              width={"100%"}
+              width={'100%'}
               placeholder="Password"
               // value={password}
               // onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
-              {...register("password")}
+              {...register('password')}
             />
             {errors.password && (
               <p
                 style={{
-                  color: "red",
-                  fontSize: "12px",
+                  color: 'red',
+                  fontSize: '12px',
                 }}
               >
                 {errors.password.message}
@@ -216,24 +216,24 @@ export default function Signup({
           {errors.root ? (
             <div>
               {errors.root.message}
-              <span className="login-link" onClick={() => navigate("/login")}>
+              <span className="login-link" onClick={() => navigate('/login')}>
                 {` Log in ->`}
               </span>
             </div>
           ) : (
             <div>
               Already a member?
-              <span className="login-link" onClick={() => navigate("/login")}>
+              <span className="login-link" onClick={() => navigate('/login')}>
                 {` Log in ->`}
               </span>
             </div>
           )}
           <subtitle>
-            By proceeding, you agree to the <span>Terms and Conditions</span>{" "}
+            By proceeding, you agree to the <span>Terms and Conditions</span>{' '}
             and <span>Privacy Policy</span>
           </subtitle>
         </div>
       </div>
     </div>
-  );
+  )
 }

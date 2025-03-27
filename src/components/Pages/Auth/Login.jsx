@@ -14,12 +14,7 @@ const LoginSchema = z.object({
   password: z.string().min(4, 'password length should be more then 8'),
 })
 
-export default function Login({
-  User,
-  setUser,
-  isAuthenticated,
-  setIsAuthenticated,
-}) {
+export default function Login({}) {
   const { setAuth, user, accessToken, refreshToken } = useAuthContext()
 
   const navigate = useNavigate()
@@ -72,7 +67,8 @@ export default function Login({
     const data = await login(username, password)
     setAuth(data.user_info, data.access, data.refresh)
 
-    // setError('root', { type: 'manual', message: '' })
+    navigate('/')
+    setError('root', { type: 'manual', message: '' })
 
     // const users = JSON.parse(localStorage.getItem('users') || '[]')
     // const user = users.find((u) => u.email === email && u.password === password)
