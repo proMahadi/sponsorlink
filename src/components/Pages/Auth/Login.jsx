@@ -67,7 +67,7 @@ export default function Login({}) {
 
     try {
       const data = await login(username, password)
-      setAuth(data.user_info, data.access, data.refresh)
+      setAuth(data.user_info, data.profile, data.access, data.refresh)
 
       navigate('/')
       setError('root', { message: '' })
