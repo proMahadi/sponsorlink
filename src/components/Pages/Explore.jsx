@@ -245,6 +245,7 @@ export default function Explore() {
                 <div
                   style={{
                     top: 85,
+                    width: 500,
                     position: state.hasExplored ? 'sticky' : 'static',
                   }}
                 >

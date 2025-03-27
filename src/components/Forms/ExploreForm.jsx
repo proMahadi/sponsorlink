@@ -33,6 +33,9 @@ import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
 } from 'use-places-autocomplete'
+import { getCategory } from '@/api/category'
+import { getIndustry } from '@/api/industry'
+import { getTags, getTagsByFilter, createTag } from '@/api/tags'
 
 const libraries = ['places']
 const mapContainerStyle = {
@@ -362,44 +365,53 @@ const ExploreForm = ({ onSubmit, loading }) => {
   }
 
   const [newTag, setNewTag] = useState(null)
+  const [fetchedTags, setFetchedTags] = useState([])
   const [searchTagInputValue, setSearchTagInputValue] = useState(null)
-  const [tags, setTags] = useState(tagChoices)
+  const [tags, setTags] = useState(fetchedTags)
   const [isSearchedTagFound, setIsSearchedTagFound] = useState(false)
   const handleTagSearch = (e) => {
     const searchQuery = e.target.value.toLowerCase()
-
     setSearchTagInputValue(e.target.value)
 
-    const foundTag = tagChoices.filter(
-      (choice) =>
-        choice.value.toLowerCase().includes(searchQuery) ||
-        choice.label.toLowerCase().includes(searchQuery)
-    )
-
-    if (foundTag.length < 1 && e.target.value.trim() !== '') {
-      setIsSearchedTagFound(true)
-    } else {
-      setIsSearchedTagFound(false)
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      tags: foundTag.map((tag) => tag),
-    }))
-  }
-  const handleAddNewTag = () => {
-    if (
-      searchTagInputValue &&
-      !tags.some((tag) => tag.value === searchTagInputValue)
-    ) {
-      const newTag = {
-        id: new Date().getTime(),
-        value: searchTagInputValue,
-        label: searchTagInputValue,
+    getTagsByFilter(searchQuery).then((foundTags) => {
+      if (foundTags.length < 1 && e.target.value.trim() !== '') {
+        setIsSearchedTagFound(true)
+      } else {
+        setIsSearchedTagFound(false)
       }
 
-      setTags((prevTags) => [newTag, ...prevTags])
-    }
+      console.log({ foundTags })
+      setFormData((prev) => ({ ...prev, tags: foundTags }))
+    })
+  }
+  const handleAddNewTag = () => {
+    createTag(searchTagInputValue).then((tag) => {
+      setTags((prevTags) => [tag, ...prevTags])
+      setFetchedTags((prevTags) => [tag, ...prevTags])
+
+      getTagsByFilter(searchTagInputValue).then((foundTags) => {
+        if (foundTags.length < 1 && searchTagInputValue.trim() !== '') {
+          setIsSearchedTagFound(true)
+        } else {
+          setIsSearchedTagFound(false)
+        }
+
+        setFormData((prev) => ({ ...prev, tags: foundTags }))
+      })
+    })
+
+    // if (
+    //   searchTagInputValue &&
+    //   !tags.some((tag) => tag.value === searchTagInputValue)
+    // ) {
+    //   const newTag = {
+    //     id: new Date().getTime(),
+    //     value: searchTagInputValue,
+    //     label: searchTagInputValue,
+    //   };
+
+    //   setTags((prevTags) => [newTag, ...prevTags]);
+    // }
   }
   console.log(newTag)
 
@@ -411,11 +423,45 @@ const ExploreForm = ({ onSubmit, loading }) => {
   //   // setSliderValues((prev)=>({...prev,radiusSlider:e.target.value}))
   // }
 
+  const [fetchedCategory, setFetchedCategory] = useState([])
+  const [fetchedIndustry, setFetchedIndustry] = useState([])
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const category = await getCategory()
+        setFetchedCategory(category)
+      } catch (error) {
+        console.log('error:', error)
+      }
+    }
+    const fetchIndustry = async () => {
+      try {
+        const industry = await getIndustry()
+        setFetchedIndustry(industry)
+      } catch (error) {
+        console.log('error:', error)
+      }
+    }
+    const fetchTags = async () => {
+      try {
+        const tags = await getTags()
+        setFetchedTags(tags)
+      } catch (error) {
+        console.log('error:', error)
+      }
+    }
+    fetchCategory()
+    fetchIndustry()
+    fetchTags()
+  }, [])
+
   if (!isInitialized) {
     return
   }
   if (loadError) return 'Error'
   if (!isLoaded) return 'Loading...'
+
   return (
     <>
       <Card className="prevent-select">
@@ -434,9 +480,12 @@ const ExploreForm = ({ onSubmit, loading }) => {
                 {...register('opportunity_type')}
                 placeholder="Select Opportunity Type"
               >
-                {opportunityTypeChoices.map((choice) => (
-                  <Select.Option key={choice.value} value={choice.value}>
-                    {choice.label}
+                {fetchedCategory.map((choice) => (
+                  <Select.Option
+                    key={choice.id.toString()}
+                    value={choice.id.toString()}
+                  >
+                    {choice.name}
                   </Select.Option>
                 ))}
               </Select>
@@ -450,9 +499,12 @@ const ExploreForm = ({ onSubmit, loading }) => {
                 placeholder="Select Industry"
                 {...register('industry')}
               >
-                {industryChoices.map((choice) => (
-                  <Select.Option key={choice.value} value={choice.value}>
-                    {choice.label}
+                {fetchedIndustry.map((choice) => (
+                  <Select.Option
+                    key={choice.id.toString()}
+                    value={choice.id.toString()}
+                  >
+                    {choice.name}
                   </Select.Option>
                 ))}
               </Select>
@@ -555,8 +607,8 @@ const ExploreForm = ({ onSubmit, loading }) => {
                   />
                 }
                 formDataTags={formData.tags}
-                formData={formData}
-                tagChoices={tags}
+                formData={fetchedTags}
+                tagChoices={fetchedTags}
                 handleAddNewTag={handleAddNewTag}
                 isSearchedTagFound={isSearchedTagFound}
               />
