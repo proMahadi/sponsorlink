@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Divider,
   Input,
@@ -7,7 +7,7 @@ import {
   Textarea,
   Modal,
   AutoComplete,
-} from '@geist-ui/core'
+} from "@geist-ui/core";
 import {
   Mail,
   Phone,
@@ -16,13 +16,13 @@ import {
   Github,
   Linkedin,
   Edit,
-} from '@geist-ui/icons'
-import { industryChoices, tagChoices, countryChoices } from '@/utils/constants'
-import '@/styles/Auth.css'
-import axios from 'axios'
-import { useFieldArray, useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+} from "@geist-ui/icons";
+import { industryChoices, tagChoices, countryChoices } from "@/utils/constants";
+import "@/styles/Auth.css";
+import axios from "axios";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 // google maps imports & variables
 import {
@@ -31,22 +31,22 @@ import {
   Marker,
   InfoWindow,
   Circle,
-} from '@react-google-maps/api'
+} from "@react-google-maps/api";
 import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
-} from 'use-places-autocomplete'
+} from "use-places-autocomplete";
 
-const libraries = ['places']
+const libraries = ["places"];
 const mapContainerStyle = {
-  height: '300px',
+  height: "300px",
   // width: "100vw",
-}
+};
 const options = {
   // styles: mapStyles,
   disableDefaultUI: true,
   zoomControl: true,
-}
+};
 // const circleOptions = {
 //   // styles: mapStyles,
 //   disableDefaultUI: true,
@@ -60,21 +60,21 @@ const options = {
 const center = {
   lat: 0,
   lng: 0,
-}
+};
 navigator.geolocation.getCurrentPosition((position) => {
   const myLocation = {
     lat: position.coords.latitude,
     lng: position.coords.longitude,
-  }
+  };
 
   // console.log(myLocation, "my location");
 
   // Update center with myLocation values
-  center.lat = myLocation.lat
-  center.lng = myLocation.lng
+  center.lat = myLocation.lat;
+  center.lng = myLocation.lng;
 
   // console.log(center, "updated center");
-})
+});
 // google maps imports & variables
 
 //  <button
@@ -96,83 +96,83 @@ navigator.geolocation.getCurrentPosition((position) => {
 
 const INITIAL_DATA = {
   id: null,
-  email: '',
-  password: '',
+  email: "",
+  password: "",
   hasRegistered: false,
-  first_name: '',
-  surname: '',
-  name: '',
-  phone: '',
-  profile_image: '',
-  country: '',
-  address: '',
-  postcode: '',
-  city: '',
+  first_name: "",
+  surname: "",
+  name: "",
+  phone: "",
+  profile_image: "",
+  country: "",
+  address: "",
+  postcode: "",
+  city: "",
   latitude: null,
   longitude: null,
   available: null,
-  username: '',
-  bio: '',
-  user_type: '',
-  industry: '',
-  linkedin: '',
-  github: '',
-  twitter: '',
-  instagram: '',
-  youtube: '',
-  tiktok: '',
+  username: "",
+  bio: "",
+  user_type: "",
+  industry: "",
+  linkedin: "",
+  github: "",
+  twitter: "",
+  instagram: "",
+  youtube: "",
+  tiktok: "",
   tags: [],
   specialized_tags: [],
-}
+};
 
 const CreateProfileSchema = z.object({
-  first_name: z.string().min(1, 'first name is required'),
-  surname: z.string().min(1, 'surname is required'),
-  username: z.string().min(1, 'username is required'),
-  phone_number: z.string().min(1, 'phone number is required'),
-  address: z.string().min(1, 'address is required'),
-  city: z.string().min(1, 'city is required'),
-  country: z.string().min(1, 'country is required'),
-  user_type: z.string().min(1, 'user type is required'),
-  industryChoices: z.string().min(1, 'industry field is required'),
-  tagChoices: z.string().min((length = 1), 'minimum 1 tag is required'),
-  linkedin: z.string().min(1, 'linkedin profile is required'),
-  github: z.string().min(1, 'github profile is required'),
-  twitter: z.string().min(1, 'twitter profile is required'),
-  instagram: z.string().min(1, 'instagram profile is required'),
-  youtube: z.string().min(1, 'youtube profile is required'),
-  tiktok: z.string().min(1, 'tiktok profile is required'),
-})
+  first_name: z.string().min(1, "first name is required"),
+  surname: z.string().min(1, "surname is required"),
+  username: z.string().min(1, "username is required"),
+  phone_number: z.string().min(1, "phone number is required"),
+  address: z.string().min(1, "address is required"),
+  city: z.string().min(1, "city is required"),
+  country: z.string().min(1, "country is required"),
+  user_type: z.string().min(1, "user type is required"),
+  industryChoices: z.string().min(1, "industry field is required"),
+  tagChoices: z.string().min((length = 1), "minimum 1 tag is required"),
+  linkedin: z.string().min(1, "linkedin profile is required"),
+  github: z.string().min(1, "github profile is required"),
+  twitter: z.string().min(1, "twitter profile is required"),
+  instagram: z.string().min(1, "instagram profile is required"),
+  youtube: z.string().min(1, "youtube profile is required"),
+  tiktok: z.string().min(1, "tiktok profile is required"),
+});
 
 export default function RegiserForm({ User, setUser }) {
-  const [formData, setFormData] = useState(INITIAL_DATA)
-  const [currentStep, setCurrentStep] = useState('personal') // 'personal' or 'profile'
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [tempImageUrl, setTempImageUrl] = useState('')
+  const [formData, setFormData] = useState(INITIAL_DATA);
+  const [currentStep, setCurrentStep] = useState("personal"); // 'personal' or 'profile'
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tempImageUrl, setTempImageUrl] = useState("");
 
   // google maps states hooks and functions
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     libraries,
-  })
-  const [markers, setMarkers] = useState([])
-  const [selected, setSelected] = useState(null)
+  });
+  const [markers, setMarkers] = useState([]);
+  const [selected, setSelected] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState({
-    house: '',
-    street_name: '',
-    route: '',
-    area: '',
-    postal_code: '',
-    city: '',
-    country: '',
-    address: '',
-  })
-  const [searchLocationValue, setSearchLocationValue] = useState('')
-  const clickedLocation = markers.map((marker) => marker)
+    house:"",
+    street_name: "",
+    route: "",
+    area: "",
+    postal_code: "",
+    city: "",
+    country: "",
+    address: "",
+  });
+  const [searchLocationValue,setSearchLocationValue]=useState("")
+  const clickedLocation = markers.map((marker)=>marker)
   // console.log(clickedLocation,"clickedLocation")
-  console.log(markers, 'selected lat lng')
-  const { house, street_name, route, area, postal_code, city, country } =
-    selectedLocation
+  console.log(markers, "selected lat lng");
+  const { house,street_name, route, area, postal_code, city, country } =
+    selectedLocation;
   console.log(
     house,
     street_name,
@@ -181,8 +181,8 @@ export default function RegiserForm({ User, setUser }) {
     postal_code,
     city,
     country,
-    'slected city and country'
-  )
+    "slected city and country"
+  );
 
   const fetchGeocodeResults = async () => {
     try {
@@ -190,47 +190,47 @@ export default function RegiserForm({ User, setUser }) {
         markers.map((marker) =>
           getGeocode({ location: { lat: marker.lat, lng: marker.lng } })
         )
-      )
+      );
 
       // Extract city and country from the results
       results.forEach((result) => {
         if (result.length > 0) {
-          const addressComponents = result[0].address_components
+          const addressComponents = result[0].address_components;
 
-          console.log(addressComponents, 'address component')
+          console.log(addressComponents, "address component");
 
-          let city = ''
-          let country = ''
-          let area = ''
-          let route = ''
-          let postal_code = ''
-          let street_name = ''
-          let house = ''
+          let city = "";
+          let country = "";
+          let area = "";
+          let route = "";
+          let postal_code = "";
+          let street_name = "";
+          let house = "";
 
           addressComponents.forEach((component) => {
-            if (component.types.includes('street_number')) {
-              house = component.long_name
+            if (component.types.includes("street_number")) {
+              house = component.long_name;
             }
-            if (component.types.includes('establishment')) {
-              street_name = component.long_name
+            if (component.types.includes("establishment")) {
+              street_name = component.long_name;
             }
-            if (component.types.includes('postal_code')) {
-              postal_code = component.long_name
+            if (component.types.includes("postal_code")) {
+              postal_code = component.long_name;
             }
-            if (component.types.includes('route')) {
-              route = component.long_name
+            if (component.types.includes("route")) {
+              route = component.long_name;
             }
-            if (component.types.includes('sublocality')) {
-              area = component.long_name
+            if (component.types.includes("sublocality")) {
+              area = component.long_name;
             }
-            if (component.types.includes('locality')) {
-              city = component.long_name
+            if (component.types.includes("locality")) {
+              city = component.long_name;
             }
-            if (component.types.includes('country')) {
-              country = component.long_name
+            if (component.types.includes("country")) {
+              country = component.long_name;
             }
             setSelectedLocation({
-              house: house,
+              house:house,
               city: city,
               country: country,
               area: area,
@@ -238,29 +238,29 @@ export default function RegiserForm({ User, setUser }) {
               postal_code: postal_code,
               street_name: street_name,
               address: result[0].formatted_address,
-            })
-          })
+            });
+          });
 
           console.log(
-            'City:',
+            "City:",
             city,
-            'Country:',
+            "Country:",
             country,
-            'Area:',
+            "Area:",
             area,
-            'route:',
+            "route:",
             route,
-            'postal:',
+            "postal:",
             postal_code,
-            'street name:',
+            "street name:",
             street_name
-          )
+          );
         }
-      })
+      });
     } catch (error) {
-      console.error('Error fetching geocode results:', error)
+      console.error("Error fetching geocode results:", error);
     }
-  }
+  };
   // google maps states hooks and functions
 
   // useEffect(() => {
@@ -270,8 +270,8 @@ export default function RegiserForm({ User, setUser }) {
   // }, [markers]);
 
   const onMapClick = useCallback((e) => {
-    console.log(e.latLng.lat(), 'latitude')
-    console.log(e.latLng.lng(), 'longitude')
+    console.log(e.latLng.lat(), "latitude");
+    console.log(e.latLng.lng(), "longitude");
     setMarkers((current) => [
       // ...current,
       {
@@ -279,46 +279,46 @@ export default function RegiserForm({ User, setUser }) {
         lng: e.latLng.lng(),
         time: new Date(),
       },
-    ])
+    ]);
     // setSearchLocationValue( street_name, route, area, postal_code, city, country )
-  }, [])
+  }, []);
 
-  //   const onMapClick = useCallback(async (e) => {
-  //   const lat = e.latLng.lat();
-  //   const lng = e.latLng.lng();
+//   const onMapClick = useCallback(async (e) => {
+//   const lat = e.latLng.lat();
+//   const lng = e.latLng.lng();
 
-  //   console.log(lat, "latitude");
-  //   console.log(lng, "longitude");
+//   console.log(lat, "latitude");
+//   console.log(lng, "longitude");
 
-  //   setMarkers([
-  //     {
-  //       lat,
-  //       lng,
-  //       time: new Date(),
-  //     },
-  //   ]);
+//   setMarkers([
+//     {
+//       lat,
+//       lng,
+//       time: new Date(),
+//     },
+//   ]);
 
-  //   try {
-  //     // Reverse geocode to get the address
-  //     const results = await getGeocode({ location: { lat, lng } });
+//   try {
+//     // Reverse geocode to get the address
+//     const results = await getGeocode({ location: { lat, lng } });
 
-  //     if (results.length > 0) {
-  //       const address = results[0].formatted_address;
-  //       setValue(address); // Update the search input
-  //     }
-  //   } catch (error) {
-  //     console.log("Error getting address: ", error);
-  //   }
-  // }, []);
+//     if (results.length > 0) {
+//       const address = results[0].formatted_address;
+//       setValue(address); // Update the search input
+//     }
+//   } catch (error) {
+//     console.log("Error getting address: ", error);
+//   }
+// }, []);
 
-  const mapRef = useRef()
+  const mapRef = useRef();
   const onMapLoad = useCallback((map) => {
-    mapRef.current = map
-  }, [])
+    mapRef.current = map;
+  }, []);
 
   const panTo = useCallback(({ lat, lng }) => {
-    mapRef.current.panTo({ lat, lng })
-    mapRef.current.setZoom(14)
+    mapRef.current.panTo({ lat, lng });
+    mapRef.current.setZoom(14);
     setMarkers((current) => [
       // ...current,
       {
@@ -326,33 +326,35 @@ export default function RegiserForm({ User, setUser }) {
         lng,
         time: new Date(),
       },
-    ])
-  }, [])
+    ]);
+  }, []);
 
   const {
     register,
+    handleSubmit,
+    getValues,
     control,
     formState: { errors, isLoading, isSubmitting },
   } = useForm({
     defaultValues: {
-      first_name: '',
-      surname: '',
-      username: '',
-      phone_number: '',
-      address: '',
-      city: '',
-      country: '',
-      user_type: '',
-      industryChoices: '',
+      first_name: "",
+      surname: "",
+      username: "",
+      phone_number: "",
+      address: "",
+      city: "",
+      country: "",
+      user_type: "",
+      industryChoices: "",
       tags: [],
-      linkedin: '',
-      github: '',
-      twitter: '',
-      instagram: '',
-      youtube: '',
-      tiktok: '',
+      linkedin: "",
+      github: "",
+      twitter: "",
+      instagram: "",
+      youtube: "",
+      tiktok: "",
     },
-  })
+  });
 
   // const { fields } = useFieldArray({
   //   control,
@@ -361,36 +363,63 @@ export default function RegiserForm({ User, setUser }) {
 
   useEffect(() => {
     if (User?.id) {
-      const users = JSON.parse(localStorage.getItem('users') || '[]')
-      const existingUser = users.find((u) => u.id === User.id)
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const existingUser = users.find((u) => u.id === User.id);
       if (existingUser) {
-        setFormData({ ...existingUser })
+        setFormData({ ...existingUser });
       } else {
-        setFormData({ ...INITIAL_DATA, ...User })
+        setFormData({ ...INITIAL_DATA, ...User });
       }
     }
     if (markers.length > 0) {
-      fetchGeocodeResults()
+      fetchGeocodeResults();
     }
-  }, [User, markers])
+  }, [User, markers]);
 
   const handleInputChange = (name, value) => {
     setFormData((prev) => {
       const updates = {
         ...prev,
         [name]: value,
+      };
+
+      if (name === "first_name" || name === "surname") {
+        updates.name = `${updates.first_name} ${updates.surname}`.trim();
       }
 
-      if (name === 'first_name' || name === 'surname') {
-        updates.name = `${updates.first_name} ${updates.surname}`.trim()
-      }
+      return updates;
+    });
+  };
 
-      return updates
-    })
-  }
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    const {first_name,surname,phone_number,address,} = getValues()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+   
+        try{
+          const authenticatedUser = await updateProfile({
+            first_name:first_name,
+            last_name:surname,
+          },{
+            phone_number: "",
+            address: "",
+            city: "",
+            country: "",
+            user_type: "",
+            industryChoices: "",
+            tags: [],
+            linkedin: "",
+            github: "",
+            twitter: "",
+            instagram: "",
+            youtube: "",
+            tiktok: "",
+          })
+          console.log(authenticatedUser)
+        } catch (error) {
+          console.log("error:", error);
+        }
+      
 
     // Get location data before saving
     // const { address, postcode, city, country } = formData;
@@ -400,71 +429,71 @@ export default function RegiserForm({ User, setUser }) {
     //   query
     // )}&key=${apiKey}&no_annotations=1&language=en`;
 
-    try {
-      const response = await axios.get(url)
-      const results = response.data
+    // try {
+    //   const response = await axios.get(url);
+    //   const results = response.data;
 
-      let updatedFormData = {
-        ...formData,
-        hasRegistered: true,
-      }
+    //   let updatedFormData = {
+    //     ...formData,
+    //     hasRegistered: true,
+    //   };
 
-      if (results && results.results.length > 0) {
-        updatedFormData = {
-          ...updatedFormData,
-          latitude: results.results[0].geometry.lat,
-          longitude: results.results[0].geometry.lng,
-        }
-      }
+    //   if (results && results.results.length > 0) {
+    //     updatedFormData = {
+    //       ...updatedFormData,
+    //       latitude: results.results[0].geometry.lat,
+    //       longitude: results.results[0].geometry.lng,
+    //     };
+    //   }
 
-      // Update localStorage
-      const users = JSON.parse(localStorage.getItem('users') || '[]')
-      const userIndex = users.findIndex((u) => u.id === formData.id)
+    //   // Update localStorage
+    //   const users = JSON.parse(localStorage.getItem("users") || "[]");
+    //   const userIndex = users.findIndex((u) => u.id === formData.id);
 
-      if (userIndex >= 0) {
-        users[userIndex] = updatedFormData
-      } else {
-        users.push(updatedFormData)
-      }
+    //   if (userIndex >= 0) {
+    //     users[userIndex] = updatedFormData;
+    //   } else {
+    //     users.push(updatedFormData);
+    //   }
 
-      localStorage.setItem('users', JSON.stringify(users))
+    //   localStorage.setItem("users", JSON.stringify(users));
 
-      // Update sessionStorage
-      sessionStorage.setItem('user', JSON.stringify(updatedFormData))
+    //   // Update sessionStorage
+    //   sessionStorage.setItem("user", JSON.stringify(updatedFormData));
 
-      // Update state
-      setUser(updatedFormData)
-    } catch (error) {
-      console.error('Error fetching location data:', error)
-      // Still save the form data even if geocoding fails
-      const updatedFormData = {
-        ...formData,
-        hasRegistered: true,
-      }
+    //   // Update state
+    //   setUser(updatedFormData);
+    // } catch (error) {
+    //   console.error("Error fetching location data:", error);
+    //   // Still save the form data even if geocoding fails
+    //   const updatedFormData = {
+    //     ...formData,
+    //     hasRegistered: true,
+    //   };
 
-      // Perform storage updates without coordinates
-      const users = JSON.parse(localStorage.getItem('users') || '[]')
-      const userIndex = users.findIndex((u) => u.id === formData.id)
+    //   // Perform storage updates without coordinates
+    //   const users = JSON.parse(localStorage.getItem("users") || "[]");
+    //   const userIndex = users.findIndex((u) => u.id === formData.id);
 
-      if (userIndex >= 0) {
-        users[userIndex] = updatedFormData
-      } else {
-        users.push(updatedFormData)
-      }
+    //   if (userIndex >= 0) {
+    //     users[userIndex] = updatedFormData;
+    //   } else {
+    //     users.push(updatedFormData);
+    //   }
 
-      localStorage.setItem('users', JSON.stringify(users))
-      sessionStorage.setItem('user', JSON.stringify(updatedFormData))
-      setUser(updatedFormData)
-    }
-  }
+    //   localStorage.setItem("users", JSON.stringify(users));
+    //   sessionStorage.setItem("user", JSON.stringify(updatedFormData));
+    //   setUser(updatedFormData);
+    // }
+  };
 
   const handleImageSave = () => {
-    handleInputChange('profile_image', tempImageUrl)
-    setIsModalOpen(false)
-  }
+    handleInputChange("profile_image", tempImageUrl);
+    setIsModalOpen(false);
+  };
 
-  if (loadError) return 'Error'
-  if (!isLoaded) return 'Loading...'
+  if (loadError) return "Error";
+  if (!isLoaded) return "Loading...";
 
   const renderPersonalInfo = () => {
     // const options = [
@@ -481,23 +510,20 @@ export default function RegiserForm({ User, setUser }) {
           style={{
             backgroundImage: formData.profile_image
               ? `url(${formData.profile_image})`
-              : 'none',
-            position: 'relative',
-            overflow: 'hidden',
-            cursor: 'pointer',
+              : "none",
+              position:"relative",
+              overflow:"hidden",
+              cursor:"pointer"
           }}
         >
           {!formData.profile_image && <Edit />}
-          <input
-            type="file"
-            style={{
-              position: 'absolute',
-              height: '100%',
-              width: '100%',
-              opacity: '0',
-              cursor: 'pointer',
-            }}
-          />
+          <input type="file" style={{
+            position:"absolute",
+            height:"100%",
+            width:"100%",
+            opacity:"0",
+            cursor:"pointer"
+          }} />
         </div>
 
         <Modal visible={isModalOpen} onClose={() => setIsModalOpen(false)}>
@@ -521,7 +547,7 @@ export default function RegiserForm({ User, setUser }) {
         <div className="flex-fields">
           <div
             style={{
-              width: '100%',
+              width: "100%",
             }}
           >
             <Input
@@ -529,15 +555,15 @@ export default function RegiserForm({ User, setUser }) {
               //   value={formData.first_name}
               //   onChange={(e) => handleInputChange("first_name", e.target.value)}
               placeholder="John"
-              {...register('first_name')}
+              {...register("first_name")}
             >
               First Name
             </Input>
             {errors.first_name && (
               <p
                 style={{
-                  color: 'red',
-                  fontSize: '12px',
+                  color: "red",
+                  fontSize: "12px",
                 }}
               >
                 {errors.first_name.message}
@@ -546,7 +572,7 @@ export default function RegiserForm({ User, setUser }) {
           </div>
           <div
             style={{
-              width: '100%',
+              width: "100%",
             }}
           >
             <Input
@@ -554,15 +580,15 @@ export default function RegiserForm({ User, setUser }) {
               //   value={formData.surname}
               //   onChange={(e) => handleInputChange("surname", e.target.value)}
               placeholder="Smith"
-              {...register('surname')}
+              {...register("surname")}
             >
               Surname
             </Input>
             {errors.surname && (
               <p
                 style={{
-                  color: 'red',
-                  fontSize: '12px',
+                  color: "red",
+                  fontSize: "12px",
                 }}
               >
                 {errors.surname.message}
@@ -575,7 +601,7 @@ export default function RegiserForm({ User, setUser }) {
         <div className="flex-fields">
           <div
             style={{
-              width: '100%',
+              width: "100%",
             }}
           >
             <Input
@@ -583,15 +609,15 @@ export default function RegiserForm({ User, setUser }) {
               //   value={formData.username}
               //   onChange={(e) => handleInputChange("username", e.target.value)}
               placeholder="johnsmith1988"
-              {...register('username')}
+              {...register("username")}
             >
               Username
             </Input>
             {errors.username && (
               <p
                 style={{
-                  color: 'red',
-                  fontSize: '12px',
+                  color: "red",
+                  fontSize: "12px",
                 }}
               >
                 {errors.username.message}
@@ -600,7 +626,7 @@ export default function RegiserForm({ User, setUser }) {
           </div>
           <div
             style={{
-              width: '100%',
+              width: "100%",
             }}
           >
             <Input
@@ -609,15 +635,15 @@ export default function RegiserForm({ User, setUser }) {
               //   value={formData.phone}
               //   onChange={(e) => handleInputChange("phone", e.target.value)}
               placeholder="+44 123 456 7890"
-              {...register('phone_number')}
+              {...register("phone_number")}
             >
               Phone Number
             </Input>
             {errors.phone_number && (
               <p
                 style={{
-                  color: 'red',
-                  fontSize: '12px',
+                  color: "red",
+                  fontSize: "12px",
                 }}
               >
                 {errors.phone_number.message}
@@ -627,7 +653,7 @@ export default function RegiserForm({ User, setUser }) {
         </div>
         <br />
         <Divider>
-          <span style={{ fontWeight: '400', color: '#444' }}>
+          <span style={{ fontWeight: "400", color: "#444" }}>
             Enter your Address
           </span>
         </Divider>
@@ -637,19 +663,13 @@ export default function RegiserForm({ User, setUser }) {
             {/* <Locate panTo={panTo} /> */}
             <div
               style={{
-                marginBottom: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
+                marginBottom: "14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
               }}
             >
-              <Search
-                selectedLocation={selectedLocation}
-                searchLocationValue={searchLocationValue}
-                markers={markers}
-                clickedLocation={clickedLocation}
-                panTo={panTo}
-              />
+              <Search selectedLocation={selectedLocation} searchLocationValue={searchLocationValue} markers={markers} clickedLocation={clickedLocation} panTo={panTo} />
               {/* <div
                 style={{
                   width: "100%",
@@ -707,7 +727,7 @@ export default function RegiserForm({ User, setUser }) {
                     key={`${marker.lat}-${marker.lng}`}
                     position={{ lat: marker.lat, lng: marker.lng }}
                     onClick={() => {
-                      setSelected(marker)
+                      setSelected(marker);
                     }}
                     // icon={{
                     //   url: `/bear.svg`,
@@ -734,14 +754,14 @@ export default function RegiserForm({ User, setUser }) {
                 <InfoWindow
                   position={{ lat: selected.lat, lng: selected.lng }}
                   onCloseClick={() => {
-                    setSelected(null)
+                    setSelected(null);
                   }}
                 >
                   <div>
                     <h2>
                       <span role="img" aria-label="bear">
                         🐻
-                      </span>{' '}
+                      </span>{" "}
                       Alert
                     </h2>
                     {/* <p>Spotted {formatRelative(selected.time, new Date())}</p> */}
@@ -752,18 +772,18 @@ export default function RegiserForm({ User, setUser }) {
           </div>
         </div>
         <br />
-        <button type="button" onClick={() => setCurrentStep('profile')}>
+        <button type="button" onClick={() => setCurrentStep("profile")}>
           Next
         </button>
       </>
-    )
-  }
+    );
+  };
   const renderProfileDetails = () => (
     <div className="profile-details">
       <div className="flex-fields">
         <Toggle
           checked={formData.available}
-          onChange={(e) => handleInputChange('available', e.target.checked)}
+          onChange={(e) => handleInputChange("available", e.target.checked)}
         ></Toggle>
         Available for Opportunities
       </div>
@@ -771,7 +791,7 @@ export default function RegiserForm({ User, setUser }) {
       <div className="select-fields">
         <div
           style={{
-            width: '100%',
+            width: "100%",
           }}
         >
           <Select
@@ -779,7 +799,7 @@ export default function RegiserForm({ User, setUser }) {
             placeholder="Select User Type"
             //   value={formData.user_type}
             //   onChange={(val) => handleInputChange("user_type", val)}
-            {...register('user_type')}
+            {...register("user_type")}
           >
             <Select.Option value="individual">Individual</Select.Option>
             <Select.Option value="business">Business</Select.Option>
@@ -788,8 +808,8 @@ export default function RegiserForm({ User, setUser }) {
           {errors.user_type && (
             <p
               style={{
-                color: 'red',
-                fontSize: '12px',
+                color: "red",
+                fontSize: "12px",
               }}
             >
               {errors.user_type.message}
@@ -797,13 +817,13 @@ export default function RegiserForm({ User, setUser }) {
           )}
         </div>
 
-        <div style={{ width: '100%' }}>
+        <div style={{ width: "100%" }}>
           <Select
             width="98.6%"
             placeholder="Select Industry"
             //   value={formData.industry}
             //   onChange={(val) => handleInputChange("industry", val)}
-            {...register('industryChoices')}
+            {...register("industryChoices")}
           >
             {industryChoices.map((choice) => (
               <Select.Option key={choice.value} value={choice.value}>
@@ -815,7 +835,7 @@ export default function RegiserForm({ User, setUser }) {
 
         <div
           style={{
-            width: '100%',
+            width: "100%",
           }}
         >
           <Select
@@ -825,7 +845,7 @@ export default function RegiserForm({ User, setUser }) {
             //   onChange={(val) => handleInputChange("tags", val)}
             multiple
             scale={0.9}
-            {...register('tags')}
+            {...register("tags")}
           >
             {tagChoices.map((choice) => (
               <Select.Option key={choice.value} value={choice.value}>
@@ -851,7 +871,7 @@ export default function RegiserForm({ User, setUser }) {
                 </Select> */}
       </div>
 
-      <div style={{ width: '100%' }} className="with-label">
+      <div style={{ width: "100%" }} className="with-label">
         <label>Bio</label>
         <Textarea
           width="100%"
@@ -861,11 +881,11 @@ export default function RegiserForm({ User, setUser }) {
         />
       </div>
 
-      <button type="button" onClick={() => setCurrentStep('contact')}>
+      <button type="button" onClick={() => setCurrentStep("contact")}>
         Next
       </button>
     </div>
-  )
+  );
   const renderContactInfo = () => (
     <>
       <div className="social-media-inputs">
@@ -876,15 +896,15 @@ export default function RegiserForm({ User, setUser }) {
             // value={formData.linkedin}
             // onChange={(e) => handleInputChange("linkedin", e.target.value)}
             placeholder="LinkedIn URL"
-            {...register('linkedin')}
+            {...register("linkedin")}
           >
             LinkedIn
           </Input>
           {errors.linkedin && (
             <p
               style={{
-                color: 'red',
-                fontSize: '12px',
+                color: "red",
+                fontSize: "12px",
               }}
             >
               {errors.linkedin.message}
@@ -898,15 +918,15 @@ export default function RegiserForm({ User, setUser }) {
             // value={formData.github}
             // onChange={(e) => handleInputChange("github", e.target.value)}
             placeholder="GitHub URL"
-            {...register('github')}
+            {...register("github")}
           >
             GitHub
           </Input>
           {errors.github && (
             <p
               style={{
-                color: 'red',
-                fontSize: '12px',
+                color: "red",
+                fontSize: "12px",
               }}
             >
               {errors.github.message}
@@ -920,15 +940,15 @@ export default function RegiserForm({ User, setUser }) {
             // value={formData.twitter}
             // onChange={(e) => handleInputChange("twitter", e.target.value)}
             placeholder="Twitter URL"
-            {...register('twitter')}
+            {...register("twitter")}
           >
             Twitter
           </Input>
           {errors.twitter && (
             <p
               style={{
-                color: 'red',
-                fontSize: '12px',
+                color: "red",
+                fontSize: "12px",
               }}
             >
               {errors.twitter.message}
@@ -942,15 +962,15 @@ export default function RegiserForm({ User, setUser }) {
             // value={formData.instagram}
             // onChange={(e) => handleInputChange("instagram", e.target.value)}
             placeholder="Instagram URL"
-            {...register('instagram')}
+            {...register("instagram")}
           >
             Instagram
           </Input>
           {errors.instagram && (
             <p
               style={{
-                color: 'red',
-                fontSize: '12px',
+                color: "red",
+                fontSize: "12px",
               }}
             >
               {errors.instagram.message}
@@ -964,15 +984,15 @@ export default function RegiserForm({ User, setUser }) {
             // value={formData.youtube}
             // onChange={(e) => handleInputChange("youtube", e.target.value)}
             placeholder="YouTube URL"
-            {...register('youtube')}
+            {...register("youtube")}
           >
             YouTube
           </Input>
           {errors.youtube && (
             <p
               style={{
-                color: 'red',
-                fontSize: '12px',
+                color: "red",
+                fontSize: "12px",
               }}
             >
               {errors.youtube.message}
@@ -986,15 +1006,15 @@ export default function RegiserForm({ User, setUser }) {
             // value={formData.tiktok}
             // onChange={(e) => handleInputChange("tiktok", e.target.value)}
             placeholder="TikTok URL"
-            {...register('tiktok')}
+            {...register("tiktok")}
           >
             TikTok
           </Input>
           {errors.tiktok && (
             <p
               style={{
-                color: 'red',
-                fontSize: '12px',
+                color: "red",
+                fontSize: "12px",
               }}
             >
               {errors.tiktok.message}
@@ -1005,33 +1025,33 @@ export default function RegiserForm({ User, setUser }) {
       <br />
       <button type="submit">Complete</button>
     </>
-  )
+  );
 
   const renderStepNavigation = () => (
     <div className="step-navigation">
       <button
         type="button"
-        className={currentStep === 'personal' ? 'active' : ''}
-        onClick={() => setCurrentStep('personal')}
+        className={currentStep === "personal" ? "active" : ""}
+        onClick={() => setCurrentStep("personal")}
       >
         Personal Info
       </button>
       <button
         type="button"
-        className={currentStep === 'profile' ? 'active' : ''}
-        onClick={() => setCurrentStep('profile')}
+        className={currentStep === "profile" ? "active" : ""}
+        onClick={() => setCurrentStep("profile")}
       >
         Profile Details
       </button>
       <button
         type="button"
-        className={currentStep === 'contact' ? 'active' : ''}
-        onClick={() => setCurrentStep('contact')}
+        className={currentStep === "contact" ? "active" : ""}
+        onClick={() => setCurrentStep("contact")}
       >
         Contact Info
       </button>
     </div>
-  )
+  );
 
   return (
     <div className="register-form">
@@ -1041,22 +1061,16 @@ export default function RegiserForm({ User, setUser }) {
         </h1>
         {renderStepNavigation()}
       </div>
-      <form onSubmit={handleSubmit}>
-        {currentStep === 'personal' && renderPersonalInfo()}
-        {currentStep === 'contact' && renderContactInfo()}
-        {currentStep === 'profile' && renderProfileDetails()}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {currentStep === "personal" && renderPersonalInfo()}
+        {currentStep === "contact" && renderContactInfo()}
+        {currentStep === "profile" && renderProfileDetails()}
       </form>
     </div>
-  )
+  );
 }
 
-const Search = ({
-  panTo,
-  selectedLocation,
-  searchLocationValue,
-  markers,
-  clickedLocation,
-}) => {
+const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clickedLocation}) => {
   const {
     ready,
     value,
@@ -1068,42 +1082,45 @@ const Search = ({
       location: { lat: () => 43.6532, lng: () => -79.3832 },
       radius: 100 * 1000,
     },
-  })
+  });
 
   // https://developers.google.com/maps/documentation/javascript/reference/places-autocomplete-service#AutocompletionRequest
-  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(false);
   useEffect(() => {
     // console.log('Location', selectedLocation)
     // if(selectedLocation.address) {
     //   setValue(selectedLocation.address);
     // }
     if (data.length > 0) {
-      setShowSuggestions(true)
+      setShowSuggestions(true);
     } else {
-      setShowSuggestions(false)
+      setShowSuggestions(false);
     }
-  }, [data, selectedLocation])
+  }, [data, selectedLocation]);
 
   const handleInput = (e) => {
-    setValue(e.target.value)
-  }
+    setValue(e.target.value);
+  };
 
   const handleSelect = async (address) => {
-    setValue(address)
-    clearSuggestions()
+    setValue(address);
+    clearSuggestions();
     // setShowSuggestions(false)
-    setTimeout(() => setValue(null), 10)
+    setTimeout(() => setValue(null), 10);
 
     try {
-      const results = await getGeocode({ address })
-      const { lat, lng } = await getLatLng(results[0])
-      panTo({ lat, lng })
+      const results = await getGeocode({ address });
+      const { lat, lng } = await getLatLng(results[0]);
+      panTo({ lat, lng });
     } catch (error) {
-      console.log('😱 Error: ', error)
+      console.log("😱 Error: ", error);
     }
-  }
+  };
   const { street_name, route, area, postal_code, city, country } =
-    selectedLocation
+    selectedLocation;
+
+    
+
 
   //   useEffect(async()=>{
   // try {
@@ -1122,33 +1139,34 @@ const Search = ({
   useEffect(() => {
     const fetchAddress = async () => {
       if (markers.length > 0) {
-        const lastMarker = markers[markers.length - 1] // Get the latest marker
+        const lastMarker = markers[markers.length - 1]; // Get the latest marker
         try {
-          const results = await getGeocode({ location: lastMarker })
+          const results = await getGeocode({ location: lastMarker });
           if (results.length > 0) {
-            const address = results[0].formatted_address
-            setValue(address) // Update the search input
+            const address = results[0].formatted_address;
+            setValue(address); // Update the search input
           }
         } catch (error) {
-          console.log('Error getting address: ', error)
+          console.log("Error getting address: ", error);
         }
       }
-    }
+    };
 
-    fetchAddress()
-    setTimeout(() => setValue(null), 10)
-  }, [markers]) // Run effect when markers change
+    fetchAddress();
+    setTimeout(() => setValue(null), 10);
+  }, [markers]); // Run effect when markers change
+
 
   return (
     <div
       className="search"
       style={{
-        position: 'relative',
-        width: '100%',
+        position: "relative",
+        width: "100%",
       }}
     >
       <Input
-        value={value || ''}
+        value={value||""}
         onChange={handleInput}
         disabled={!ready}
         placeholder="Search your location"
@@ -1158,24 +1176,24 @@ const Search = ({
       {showSuggestions && (
         <ul
           style={{
-            position: 'absolute',
-            top: '22px',
-            left: '0',
-            background: 'white',
-            height: 'fit-content',
+            position: "absolute",
+            top: "22px",
+            left: "0",
+            background: "white",
+            height: "fit-content",
             // width: "fit-content",
-            zIndex: '999',
-            padding: '8px',
-            borderRadius: '8px',
-            border: '1px solid #dedede',
+            zIndex: "999",
+            padding: "8px",
+            borderRadius: "8px",
+            border: "1px solid #dedede",
           }}
         >
-          {status === 'OK' &&
+          {status === "OK" &&
             data.map((mapData) => (
               // console.log(mapData,"map")
               <li
                 style={{
-                  listStyleType: 'none',
+                  listStyleType: "none",
                 }}
                 onClick={() => handleSelect(mapData.description)}
                 key={mapData.id}
@@ -1188,8 +1206,9 @@ const Search = ({
         </ul>
       )}
     </div>
-  )
-}
+  );
+};
+
 
 //   try {
 //     // Reverse geocode to get the address
