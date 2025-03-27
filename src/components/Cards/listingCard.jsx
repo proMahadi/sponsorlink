@@ -168,10 +168,7 @@ export default function ListingCard({
           )}
         </div>
       </div>
-      <div className="listing-description">
-        {listing.description +
-          ' This is a description of the listing. I have added some more text to make it longer. Enjoy the prototype Explore page!'}
-      </div>
+      <div className="listing-description">{listing.description}</div>
       <div className="listing-footer">
         <div className="labels">
           {listing.labels?.slice(0, maxLabels).map((label, index) => (

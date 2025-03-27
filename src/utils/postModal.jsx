@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { X } from "@geist-ui/icons";
-import { Select, Slider, Collapse, Input, Spacer } from "@geist-ui/core";
-import "../styles/PostModal.css";
-import { useFieldArray, useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { X } from '@geist-ui/icons'
+import { Select, Slider, Collapse, Input, Spacer } from '@geist-ui/core'
+import '../styles/PostModal.css'
+import { useFieldArray, useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 // google maps imports & variables
 import {
@@ -15,27 +14,27 @@ import {
   Marker,
   InfoWindow,
   Circle,
-} from "@react-google-maps/api";
+} from '@react-google-maps/api'
 import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
-} from "use-places-autocomplete";
+} from 'use-places-autocomplete'
 
-const libraries = ["places"];
+const libraries = ['places']
 const mapContainerStyle = {
-  height: "100px",
+  height: '100px',
   // width: "100vw",
-};
+}
 const options = {
   // styles: mapStyles,
   disableDefaultUI: true,
   zoomControl: true,
-};
+}
 const circleOptions = {
   // styles: mapStyles,
   disableDefaultUI: true,
   zoomControl: true,
-};
+}
 // const myLocation =   navigator.geolocation.getCurrentPosition((position) => panTo({lat: position.coords.latitude,lng: position.coords.longitude,}));
 // const myLatitude =   navigator.geolocation.getCurrentPosition((position) => position.coords.latitude);
 
@@ -44,42 +43,42 @@ const circleOptions = {
 const center = {
   lat: 0,
   lng: 0,
-};
+}
 navigator.geolocation.getCurrentPosition((position) => {
   const myLocation = {
     lat: position.coords.latitude,
     lng: position.coords.longitude,
-  };
+  }
 
   // console.log(myLocation, "my location");
 
   // Update center with myLocation values
-  center.lat = myLocation.lat;
-  center.lng = myLocation.lng;
+  center.lat = myLocation.lat
+  center.lng = myLocation.lng
 
   // console.log(center, "updated center");
-});
+})
 // google maps imports & variables
 
 const ExploreFormSchema = z.object({
-  opportunity_type: z.string().min(1, "opportunity type is required"),
-  industry: z.string().min(1, "industry selection is required"),
-  radius: z.string().min(1, "radius selection is required"),
-  tags: z.array().min(1, "radius selection is required"),
-});
-
+  opportunity_type: z.string().min(1, 'opportunity type is required'),
+  industry: z.string().min(1, 'industry selection is required'),
+  radius: z.string().min(1, 'radius selection is required'),
+  tags: z.array().min(1, 'radius selection is required'),
+})
 
 import {
   opportunityTypeChoices,
   industryChoices,
   tagChoices,
-} from "@/utils/constants";
-import CustomSelect from "@/components/ui/CustomSelect";
+} from '@/utils/constants'
+import CustomSelect from '@/components/ui/CustomSelect'
+import clientAxios from '@/api/axios'
 
 const formatListingsData = (data) => {
   return data.map((user) => ({
     image: `https://randomuser.me/api/portraits/${
-      Math.random() > 0.5 ? "women" : "men"
+      Math.random() > 0.5 ? 'women' : 'men'
     }/${Math.floor(Math.random() * 100)}.jpg`,
     name: user.name,
     user_type: user.user_type,
@@ -90,8 +89,8 @@ const formatListingsData = (data) => {
     distance: user.distance,
     score: Math.floor(user.pHd * 100),
     description: `A ${user.user_type} specializing in ${user.industry}.`,
-  }));
-};
+  }))
+}
 
 export default function PostModal({
   isOpen,
@@ -99,37 +98,37 @@ export default function PostModal({
   onSubmit,
   initialData = null,
 }) {
-  const minSliderValue = 50;
-  const maxSliderValue = 100;
-  const modalRef = useRef();
-  const navigate = useNavigate();
-  const [userData, setUserData] = useState(null);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const minSliderValue = 50
+  const maxSliderValue = 100
+  const modalRef = useRef()
+  const navigate = useNavigate()
+  const [userData, setUserData] = useState(null)
+  const [isDataLoaded, setIsDataLoaded] = useState(false)
   // const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    opportunity_type: initialData?.opportunity_type || "",
-    industry: initialData?.industry || "",
-    description: initialData?.description || "",
+    opportunity_type: initialData?.opportunity_type || '',
+    industry: initialData?.industry || '',
+    description: initialData?.description || '',
     radius: initialData?.radius || 100,
     tags: initialData?.tags || [],
     specializedTags: initialData?.specializedTags || [],
-  });
-    const {
-      register,
-      control,
-      formState: { errors, isLoading,isSubmitting},
-    } = useForm({
-      defaultValues: {
-        opportunity_type: "",
-        industry: "",
-        radius: 100,
-        tags: [],
-      },
-    });
-    const {fields}=useFieldArray({
-      control,
-      name:"tags"
-    })
+  })
+  const {
+    register,
+    control,
+    formState: { errors, isLoading, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      opportunity_type: '',
+      industry: '',
+      radius: 100,
+      tags: [],
+    },
+  })
+  const { fields } = useFieldArray({
+    control,
+    name: 'tags',
+  })
 
   // New state for temporary slider values
   const [sliderValues, setSliderValues] = useState({
@@ -141,36 +140,31 @@ export default function PostModal({
     countrySlider: initialData?.countrySlider || 50,
     radiusSlider: initialData?.radiusSlider || 50,
     tagEffectSlider: initialData?.tagEffectSlider || 50,
-  });
-
-
-
-
-
+  })
 
   // google maps states hooks and functions
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     libraries,
-  });
-  const [markers, setMarkers] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [addressValue,setAddressValue]=useState("")
+  })
+  const [markers, setMarkers] = useState([])
+  const [selected, setSelected] = useState(null)
+  const [addressValue, setAddressValue] = useState('')
   const [selectedLocation, setSelectedLocation] = useState({
-    house: "",
-    street_name: "",
-    route: "",
-    area: "",
-    postal_code: "",
-    city: "",
-    country: "",
-    address: "",
-  });
-      const [searchLocationValue,setSearchLocationValue]=useState("")
-      const clickedLocation = markers.map((marker)=>marker)
-  console.log(markers, "selected lat lng");
+    house: '',
+    street_name: '',
+    route: '',
+    area: '',
+    postal_code: '',
+    city: '',
+    country: '',
+    address: '',
+  })
+  const [searchLocationValue, setSearchLocationValue] = useState('')
+  const clickedLocation = markers.map((marker) => marker)
+  console.log(markers, 'selected lat lng')
   const { house, street_name, route, area, postal_code, city, country } =
-    selectedLocation;
+    selectedLocation
   console.log(
     house,
     street_name,
@@ -179,8 +173,8 @@ export default function PostModal({
     postal_code,
     city,
     country,
-    "slected city and country"
-  );
+    'slected city and country'
+  )
 
   const fetchGeocodeResults = async () => {
     try {
@@ -188,44 +182,44 @@ export default function PostModal({
         markers.map((marker) =>
           getGeocode({ location: { lat: marker.lat, lng: marker.lng } })
         )
-      );
+      )
 
       // Extract city and country from the results
       results.forEach((result) => {
         if (result.length > 0) {
-          const addressComponents = result[0].address_components;
+          const addressComponents = result[0].address_components
 
-          console.log(addressComponents, "address component");
+          console.log(addressComponents, 'address component')
 
-          let city = "";
-          let country = "";
-          let area = "";
-          let route = "";
-          let postal_code = "";
-          let street_name = "";
-          let house = "";
+          let city = ''
+          let country = ''
+          let area = ''
+          let route = ''
+          let postal_code = ''
+          let street_name = ''
+          let house = ''
 
           addressComponents.forEach((component) => {
-            if (component.types.includes("street_number")) {
-              house = component.long_name;
+            if (component.types.includes('street_number')) {
+              house = component.long_name
             }
-            if (component.types.includes("establishment")) {
-              street_name = component.long_name;
+            if (component.types.includes('establishment')) {
+              street_name = component.long_name
             }
-            if (component.types.includes("postal_code")) {
-              postal_code = component.long_name;
+            if (component.types.includes('postal_code')) {
+              postal_code = component.long_name
             }
-            if (component.types.includes("route")) {
-              route = component.long_name;
+            if (component.types.includes('route')) {
+              route = component.long_name
             }
-            if (component.types.includes("sublocality")) {
-              area = component.long_name;
+            if (component.types.includes('sublocality')) {
+              area = component.long_name
             }
-            if (component.types.includes("locality")) {
-              city = component.long_name;
+            if (component.types.includes('locality')) {
+              city = component.long_name
             }
-            if (component.types.includes("country")) {
-              country = component.long_name;
+            if (component.types.includes('country')) {
+              country = component.long_name
             }
             setSelectedLocation({
               house: house,
@@ -236,33 +230,33 @@ export default function PostModal({
               postal_code: postal_code,
               street_name: street_name,
               address: result[0].formatted_address,
-            });
-          });
+            })
+          })
 
           console.log(
-            "City:",
+            'City:',
             city,
-            "Country:",
+            'Country:',
             country,
-            "Area:",
+            'Area:',
             area,
-            "route:",
+            'route:',
             route,
-            "postal:",
+            'postal:',
             postal_code,
-            "street name:",
+            'street name:',
             street_name
-          );
+          )
         }
-      });
+      })
     } catch (error) {
-      console.error("Error fetching geocode results:", error);
+      console.error('Error fetching geocode results:', error)
     }
-  };
+  }
 
   const onMapClick = useCallback((e) => {
-    console.log(e.latLng.lat(), "latitude");
-    console.log(e.latLng.lng(), "longitude");
+    console.log(e.latLng.lat(), 'latitude')
+    console.log(e.latLng.lng(), 'longitude')
     setMarkers((current) => [
       // ...current,
       {
@@ -270,17 +264,17 @@ export default function PostModal({
         lng: e.latLng.lng(),
         time: new Date(),
       },
-    ]);
-  }, []);
+    ])
+  }, [])
 
-  const mapRef = useRef();
+  const mapRef = useRef()
   const onMapLoad = useCallback((map) => {
-    mapRef.current = map;
-  }, []);
+    mapRef.current = map
+  }, [])
 
   const panTo = useCallback(({ lat, lng }) => {
-    mapRef.current.panTo({ lat, lng });
-    mapRef.current.setZoom(14);
+    mapRef.current.panTo({ lat, lng })
+    mapRef.current.setZoom(14)
     setMarkers((current) => [
       // ...current,
       {
@@ -288,22 +282,17 @@ export default function PostModal({
         lng,
         time: new Date(),
       },
-    ]);
-  }, []);
+    ])
+  }, [])
   // google maps states hooks and functions
-
-
-
-
-
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const data = JSON.parse(sessionStorage.getItem("user"));
-      setUserData(data);
-    };
-    fetchUserData();
-  }, []);
+      const data = JSON.parse(sessionStorage.getItem('user'))
+      setUserData(data)
+    }
+    fetchUserData()
+  }, [])
 
   // New useEffect to update slider values when formData changes
   // useEffect (() => {
@@ -319,51 +308,50 @@ export default function PostModal({
       industryChoices.length > 0 &&
       tagChoices.length > 0
     ) {
-      setIsDataLoaded(true);
+      setIsDataLoaded(true)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = 'unset'
     }
 
     const handleEscape = (e) => {
-      if (e.key === "Escape" && !isSubmitting) onClose();
-    };
+      if (e.key === 'Escape' && !isSubmitting) onClose()
+    }
 
     if (markers.length > 0) {
-      fetchGeocodeResults();
+      fetchGeocodeResults()
     }
-    document.addEventListener("keydown", handleEscape);
+    document.addEventListener('keydown', handleEscape)
     return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "unset";
-    };
-
-  }, [isOpen, onClose, isSubmitting,markers]);
+      document.removeEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen, onClose, isSubmitting, markers])
 
   // Modified handleSliderChange to update temporary state
   const handleSliderChange = (name, value) => {
-    setSliderValues((prev) => ({ ...prev, [name]: value }));
-  };
+    setSliderValues((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleSelectChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   // Modify the handleSubmit function
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     // setIsSubmitting(true);
 
     // Prepare the data in the required format
     const requestData = {
       opportunity_type: formData.opportunity_type,
       industry: formData.industry,
-      country: userData?.country || "",
+      country: userData?.country || '',
       latitude: userData?.latitude || 0,
       longitude: userData?.longitude || 0,
       businessSlider: sliderValues.businessSlider / 100,
@@ -384,63 +372,51 @@ export default function PostModal({
         slider: sliderValues.tagEffectSlider / 100,
       })),
       isApply: false,
-      origin: "post",
+      origin: 'post',
       description: formData.description,
-    };
+    }
 
     try {
-      let data;
       // Only call API for new posts, not for edits
       if (!initialData) {
-        const response = await fetch(
-          "https://sponsorlink-backend.up.railway.app/api/bayes/getOrderedUsers/",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestData),
-          }
-        );
+        const { data } = await clientAxios.post(
+          '/account/listings/',
+          requestData
+        )
 
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-
-        data = await response.json();
         // console.log('Data from API:', data);
         // console.log('Formatted data:', formatListingsData(data));
         // Store the data in localStorage
-        const formattedListings = formatListingsData(data);
+        const formattedListings = formatListingsData(data)
         localStorage.setItem(
-          "exploreListings",
+          'exploreListings',
           JSON.stringify(formattedListings)
-        );
-        sessionStorage.setItem("hasExplored", "true");
+        )
+        sessionStorage.setItem('hasExplored', 'true')
       }
 
       // Create the post object
       const newPost = {
         id: initialData?.id || crypto.randomUUID(),
-        name: userData?.name || "Anonymous",
-        image: userData?.profile_image || "/default_profile_image.jpg",
+        name: userData?.name || 'Anonymous',
+        image: userData?.profile_image || '/default_profile_image.jpg',
         opportunity_type:
-          formData?.opportunity_type || initialData?.opportunity_type || "",
-        industry: formData?.industry || initialData?.industry || "",
-        country: userData?.country || "",
+          formData?.opportunity_type || initialData?.opportunity_type || '',
+        industry: formData?.industry || initialData?.industry || '',
+        country: userData?.country || '',
         radius: formData?.radius || initialData?.radius || 100,
         score: Math.round(
           (sliderValues.opportunityTypeSlider + sliderValues.industrySlider) / 2
         ),
-        description: formData?.description || initialData?.description || "",
+        description: formData?.description || initialData?.description || '',
         labels: [
-          ...(formData?.tags || initialData?.labels[0] || ""),
-          ...(formData?.specializedTags || initialData?.labels[1] || ""),
+          ...(formData?.tags || initialData?.labels[0] || ''),
+          ...(formData?.specializedTags || initialData?.labels[1] || ''),
         ],
         timestamp: initialData?.timestamp || new Date().toISOString(),
         views: initialData?.views || 0,
         applications: initialData?.applications || [],
-        engagementRate: initialData?.engagementRate || "0%",
+        engagementRate: initialData?.engagementRate || '0%',
 
         businessSlider: sliderValues.businessSlider / 100,
         influencerSlider: sliderValues.influencerSlider / 100,
@@ -453,39 +429,39 @@ export default function PostModal({
         latitude: userData?.latitude || 0,
         longitude: userData?.longitude || 0,
         isApply: false,
-        origin: "post",
-      };
+        origin: 'post',
+      }
 
-      onSubmit(newPost);
+      onSubmit(newPost)
     } catch (error) {
-      console.error("Error:", error);
+      console.error('Error:', error)
     } finally {
       // setIsSubmitting(false);
       if (!initialData) {
-        navigate("/explore");
+        navigate('/explore')
       }
     }
-  };
+  }
 
-  const [newTag, setNewTag] = useState(null);
-  const [searchTagInputValue, setSearchTagInputValue] = useState(null);
-  const [tags, setTags] = useState(tagChoices);
+  const [newTag, setNewTag] = useState(null)
+  const [searchTagInputValue, setSearchTagInputValue] = useState(null)
+  const [tags, setTags] = useState(tagChoices)
   const handleTagSearch = (e) => {
-    const searchQuery = e.target.value.toLowerCase();
+    const searchQuery = e.target.value.toLowerCase()
 
-    setSearchTagInputValue(e.target.value);
+    setSearchTagInputValue(e.target.value)
 
     const foundTag = tagChoices.filter(
       (choice) =>
         choice.value.toLowerCase().includes(searchQuery) ||
         choice.label.toLowerCase().includes(searchQuery)
-    );
+    )
 
     setFormData((prev) => ({
       ...prev,
       tags: foundTag.map((tag) => tag),
-    }));
-  };
+    }))
+  }
   const handleAddNewTag = () => {
     if (
       searchTagInputValue &&
@@ -495,18 +471,18 @@ export default function PostModal({
         id: new Date().getTime(),
         value: searchTagInputValue,
         label: searchTagInputValue,
-      };
+      }
 
-      setTags((prevTags) => [newTag, ...prevTags]);
+      setTags((prevTags) => [newTag, ...prevTags])
     }
-  };
-  const onAddressChange =(e)=>{
+  }
+  const onAddressChange = (e) => {
     setAddressValue(e.target.value)
   }
 
-  if (!isOpen || !isDataLoaded) return null;
-  if (loadError) return "Error";
-  if (!isLoaded) return "Loading...";
+  if (!isOpen || !isDataLoaded) return null
+  if (loadError) return 'Error'
+  if (!isLoaded) return 'Loading...'
   return (
     <div className="modal-overlay" onClick={(e) => !isSubmitting && onClose()}>
       <div
@@ -515,7 +491,7 @@ export default function PostModal({
         ref={modalRef}
       >
         <div className="modal-header">
-          <h2>{initialData ? "Edit Post" : "Create New Post"}</h2>
+          <h2>{initialData ? 'Edit Post' : 'Create New Post'}</h2>
           <button
             className="close-button"
             onClick={onClose}
@@ -530,11 +506,11 @@ export default function PostModal({
             <div className="form-group">
               <Select
                 placeholder="Select Opportunity Type"
-                initialValue={initialData?.opportunity_type || ""}
+                initialValue={initialData?.opportunity_type || ''}
                 // onChange={(value) =>
                 //   handleSelectChange("opportunity_type", value)
                 // }
-                {...register("opportunity_type")}
+                {...register('opportunity_type')}
               >
                 {opportunityTypeChoices.map((choice) => (
                   <Select.Option key={choice.value} value={choice.value}>
@@ -545,9 +521,9 @@ export default function PostModal({
 
               <Select
                 placeholder="Select Industry"
-                initialValue={initialData?.industry || ""}
+                initialValue={initialData?.industry || ''}
                 // onChange={(value) => handleSelectChange("industry", value)}
-                {...register("industry")}
+                {...register('industry')}
               >
                 {industryChoices.map((choice) => (
                   <Select.Option key={choice.value} value={choice.value}>
@@ -564,7 +540,7 @@ export default function PostModal({
                 max={maxSliderValue}
                 initialValue={initialData?.opportunityTypeSlider * 100 || 50}
                 onChange={(val) =>
-                  handleSliderChange("opportunityTypeSlider", val)
+                  handleSliderChange('opportunityTypeSlider', val)
                 }
               />
             </div>
@@ -575,7 +551,7 @@ export default function PostModal({
                 min={minSliderValue}
                 max={maxSliderValue}
                 initialValue={initialData?.industrySlider * 100 || 50}
-                onChange={(val) => handleSliderChange("industrySlider", val)}
+                onChange={(val) => handleSliderChange('industrySlider', val)}
               />
             </div>
 
@@ -610,7 +586,7 @@ export default function PostModal({
                   searchComponent={
                     <Input
                       value={searchTagInputValue}
-                      width={"100%"}
+                      width={'100%'}
                       name="tag"
                       placeholder="Search Tags"
                       onChange={handleTagSearch}
@@ -629,7 +605,7 @@ export default function PostModal({
                   min={minSliderValue}
                   max={maxSliderValue}
                   initialValue={initialData?.tagEffectSlider * 100 || 50}
-                  onChange={(val) => handleSliderChange("tagEffectSlider", val)}
+                  onChange={(val) => handleSliderChange('tagEffectSlider', val)}
                 />
               </div>
             </Collapse>
@@ -666,15 +642,15 @@ export default function PostModal({
                 />
               </div>
             </Collapse> */}
-             <Collapse title="Distance" bordered>
-             {/* <Search selectedLocation={selectedLocation} searchLocationValue={searchLocationValue} markers={markers} clickedLocation={clickedLocation} panTo={panTo} /> */}
+            <Collapse title="Distance" bordered>
+              {/* <Search selectedLocation={selectedLocation} searchLocationValue={searchLocationValue} markers={markers} clickedLocation={clickedLocation} panTo={panTo} /> */}
               <Spacer h={1}></Spacer>
               <div
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
+                  display: 'flex',
+                  justifyContent: 'space-between',
                   // alignItems: "center",
-                  gap: "14px",
+                  gap: '14px',
                 }}
               >
                 <Input
@@ -683,7 +659,7 @@ export default function PostModal({
                   htmlType="number"
                   // onChange={handleRadiusChange}
                   placeholder="Radius"
-                  {...register("radius")}
+                  {...register('radius')}
                   width="100%"
                 />
                 {/* <Input
@@ -706,14 +682,20 @@ export default function PostModal({
                   }}
                   onChange={onAddressChange}
                 /> */}
-                <Search selectedLocation={selectedLocation} searchLocationValue={searchLocationValue} markers={markers} clickedLocation={clickedLocation} panTo={panTo} />
+                <Search
+                  selectedLocation={selectedLocation}
+                  searchLocationValue={searchLocationValue}
+                  markers={markers}
+                  clickedLocation={clickedLocation}
+                  panTo={panTo}
+                />
               </div>
               <div
-              style={{
-                display:"none"
-              }} 
+                style={{
+                  display: 'none',
+                }}
               >
-              <Spacer h={1}></Spacer>
+                <Spacer h={1}></Spacer>
                 <GoogleMap
                   id="map"
                   mapContainerStyle={mapContainerStyle}
@@ -729,7 +711,7 @@ export default function PostModal({
                         key={`${marker.lat}-${marker.lng}`}
                         position={{ lat: marker.lat, lng: marker.lng }}
                         onClick={() => {
-                          setSelected(marker);
+                          setSelected(marker)
                         }}
                         // icon={{
                         //   url: `/bear.svg`,
@@ -742,8 +724,8 @@ export default function PostModal({
                         center={{ lat: marker.lat, lng: marker.lng }}
                         radius={sliderValues.radiusSlider}
                         options={circleOptions}
-                        onCenterChanged={() => console.log("onCenterChanged")}
-                        onRadiusChanged={() => console.log("onRadiusChanged")}
+                        onCenterChanged={() => console.log('onCenterChanged')}
+                        onRadiusChanged={() => console.log('onRadiusChanged')}
                         min={minSliderValue}
                         max={maxSliderValue}
                       />
@@ -754,14 +736,14 @@ export default function PostModal({
                     <InfoWindow
                       position={{ lat: selected.lat, lng: selected.lng }}
                       onCloseClick={() => {
-                        setSelected(null);
+                        setSelected(null)
                       }}
                     >
                       <div>
                         <h2>
                           <span role="img" aria-label="bear">
                             🐻
-                          </span>{" "}
+                          </span>{' '}
                           Alert
                         </h2>
                         {/* <p>Spotted {formatRelative(selected.time, new Date())}</p> */}
@@ -779,7 +761,7 @@ export default function PostModal({
                   max={maxSliderValue}
                   initialValue={sliderValues.radiusSlider}
                   onChange={(value) =>
-                    handleSliderChange("radiusSlider", value)
+                    handleSliderChange('radiusSlider', value)
                   }
                 />
               </div>
@@ -791,7 +773,7 @@ export default function PostModal({
                   max={maxSliderValue}
                   initialValue={sliderValues.countrySlider}
                   onChange={(value) =>
-                    handleSliderChange("countrySlider", value)
+                    handleSliderChange('countrySlider', value)
                   }
                 />
               </div>
@@ -805,7 +787,7 @@ export default function PostModal({
                   min={minSliderValue}
                   max={maxSliderValue}
                   initialValue={initialData?.businessSlider * 100 || 50}
-                  onChange={(val) => handleSliderChange("businessSlider", val)}
+                  onChange={(val) => handleSliderChange('businessSlider', val)}
                 />
               </div>
 
@@ -816,7 +798,7 @@ export default function PostModal({
                   max={maxSliderValue}
                   initialValue={initialData?.influencerSlider * 100 || 50}
                   onChange={(val) =>
-                    handleSliderChange("influencerSlider", val)
+                    handleSliderChange('influencerSlider', val)
                   }
                 />
               </div>
@@ -828,7 +810,7 @@ export default function PostModal({
                   max={maxSliderValue}
                   initialValue={initialData?.individualSlider * 100 || 50}
                   onChange={(val) =>
-                    handleSliderChange("individualSlider", val)
+                    handleSliderChange('individualSlider', val)
                   }
                 />
               </div>
@@ -840,7 +822,7 @@ export default function PostModal({
             <textarea
               defaultValue={initialData?.description}
               onChange={(e) =>
-                handleSelectChange("description", e.target.value)
+                handleSelectChange('description', e.target.value)
               }
               required
             />
@@ -861,20 +843,25 @@ export default function PostModal({
               disabled={isSubmitting}
             >
               {isSubmitting
-                ? "Loading..."
+                ? 'Loading...'
                 : initialData
-                ? "Save Changes"
-                : "Create Post"}{" "}
+                ? 'Save Changes'
+                : 'Create Post'}{' '}
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
+  )
 }
 
-
-const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clickedLocation}) => {
+const Search = ({
+  panTo,
+  selectedLocation,
+  searchLocationValue,
+  markers,
+  clickedLocation,
+}) => {
   const {
     ready,
     value,
@@ -886,69 +873,69 @@ const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clicked
       location: { lat: () => 43.6532, lng: () => -79.3832 },
       radius: 100 * 1000,
     },
-  });
+  })
 
   // https://developers.google.com/maps/documentation/javascript/reference/places-autocomplete-service#AutocompletionRequest
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false)
   useEffect(() => {
     // console.log('Location', selectedLocation)
     // if(selectedLocation.address) {
     //   setValue(selectedLocation.address);
     // }
     if (data.length > 0) {
-      setShowSuggestions(true);
+      setShowSuggestions(true)
     } else {
-      setShowSuggestions(false);
+      setShowSuggestions(false)
     }
-  }, [data, selectedLocation]);
+  }, [data, selectedLocation])
 
   const handleInput = (e) => {
-    setValue(e.target.value);
-  };
+    setValue(e.target.value)
+  }
 
   const handleSelect = async (address) => {
-    setValue(address);
-    clearSuggestions();
+    setValue(address)
+    clearSuggestions()
     // setShowSuggestions(false)
-    setTimeout(() => setValue(null), 10);
+    setTimeout(() => setValue(null), 10)
 
     try {
-      const results = await getGeocode({ address });
-      const { lat, lng } = await getLatLng(results[0]);
-      panTo({ lat, lng });
+      const results = await getGeocode({ address })
+      const { lat, lng } = await getLatLng(results[0])
+      panTo({ lat, lng })
     } catch (error) {
-      console.log("😱 Error: ", error);
+      console.log('😱 Error: ', error)
     }
-  };
+  }
   const { street_name, route, area, postal_code, city, country } =
-    selectedLocation;
+    selectedLocation
 
-      useEffect(() => {
-        const fetchAddress = async () => {
-          if (markers.length > 0) {
-            const lastMarker = markers[markers.length - 1]; // Get the latest marker
-            try {
-              const results = await getGeocode({ location: lastMarker });
-              if (results.length > 0) {
-                const address = results[0].formatted_address;
-                setValue(address); // Update the search input
-              }
-            } catch (error) {
-              console.log("Error getting address: ", error);
-            }
+  useEffect(() => {
+    const fetchAddress = async () => {
+      if (markers.length > 0) {
+        const lastMarker = markers[markers.length - 1] // Get the latest marker
+        try {
+          const results = await getGeocode({ location: lastMarker })
+          if (results.length > 0) {
+            const address = results[0].formatted_address
+            setValue(address) // Update the search input
           }
-        };
-    
-        fetchAddress();
-        setTimeout(() => setValue(null), 10);
-      }, [markers]); // Run effect when markers change
+        } catch (error) {
+          console.log('Error getting address: ', error)
+        }
+      }
+    }
+
+    fetchAddress()
+    setTimeout(() => setValue(null), 10)
+  }, [markers]) // Run effect when markers change
 
   return (
     <div
       className="search"
       style={{
-        position: "relative",
-        width: "100%",
+        position: 'relative',
+        width: '100%',
       }}
     >
       <Input
@@ -963,24 +950,24 @@ const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clicked
         <ul
           style={{
             // position: "absolute",
-            top: "22px",
-            left: "0",
-            background: "white",
-            height: "fit-content",
+            top: '22px',
+            left: '0',
+            background: 'white',
+            height: 'fit-content',
             // width: "fit-content",
-            zIndex: "999",
-            padding: "8px",
-            borderRadius: "8px",
-            border: "1px solid #dedede",
+            zIndex: '999',
+            padding: '8px',
+            borderRadius: '8px',
+            border: '1px solid #dedede',
           }}
         >
-          {status === "OK" &&
+          {status === 'OK' &&
             data.map((mapData) => (
               // console.log(mapData,"map")
               <li
-              key={mapData.id}
+                key={mapData.id}
                 style={{
-                  listStyleType: "none",
+                  listStyleType: 'none',
                 }}
                 onClick={() => handleSelect(mapData.description)}
               >
@@ -992,5 +979,5 @@ const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clicked
         </ul>
       )}
     </div>
-  );
-};
+  )
+}
