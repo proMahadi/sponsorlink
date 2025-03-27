@@ -33,6 +33,9 @@ import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
 } from "use-places-autocomplete";
+import { getCategory } from "@/api/category";
+import { getIndustry } from "@/api/industry";
+import { getTags, getTagsByFilter, createTag } from "@/api/tags";
 
 const libraries = ["places"];
 const mapContainerStyle = {
@@ -129,7 +132,7 @@ const ExploreForm = ({ onSubmit, loading }) => {
   });
   const [markers, setMarkers] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [addressValue,setAddressValue]=useState("")
+  const [addressValue, setAddressValue] = useState("");
   const [selectedLocation, setSelectedLocation] = useState({
     house: "",
     street_name: "",
@@ -140,8 +143,8 @@ const ExploreForm = ({ onSubmit, loading }) => {
     country: "",
     address: "",
   });
-    const [searchLocationValue,setSearchLocationValue]=useState("")
-    const clickedLocation = markers.map((marker)=>marker)
+  const [searchLocationValue, setSearchLocationValue] = useState("");
+  const clickedLocation = markers.map((marker) => marker);
   console.log(markers, "selected lat lng");
   const { house, street_name, route, area, postal_code, city, country } =
     selectedLocation;
@@ -350,9 +353,9 @@ const ExploreForm = ({ onSubmit, loading }) => {
       countrySlider: Math.round(sliderValues.countrySlider / 100),
       radiusSlider: Math.round(sliderValues.radiusSlider / 100),
       tagEffectSlider: Math.round(sliderValues.tagEffectSlider / 100),
-      country: userLocation.country,
-      latitude: userLocation.latitude,
-      longitude: userLocation.longitude,
+      // country: userLocation.country,
+      // latitude: userLocation.latitude,
+      // longitude: userLocation.longitude,
     };
 
     // Save to sessionStorage
@@ -362,60 +365,103 @@ const ExploreForm = ({ onSubmit, loading }) => {
   };
 
   const [newTag, setNewTag] = useState(null);
+  const [fetchedTags, setFetchedTags] = useState([]);
   const [searchTagInputValue, setSearchTagInputValue] = useState(null);
-  const [tags, setTags] = useState(tagChoices);
+  const [tags, setTags] = useState(fetchedTags);
   const [isSearchedTagFound, setIsSearchedTagFound] = useState(false);
   const handleTagSearch = (e) => {
     const searchQuery = e.target.value.toLowerCase();
-
     setSearchTagInputValue(e.target.value);
 
-    const foundTag = tagChoices.filter(
-      (choice) =>
-        choice.value.toLowerCase().includes(searchQuery) ||
-        choice.label.toLowerCase().includes(searchQuery)
-    );
+    getTagsByFilter(searchQuery).then((foundTags) => {
+      if (foundTags.length < 1 && e.target.value.trim() !== "") {
+        setIsSearchedTagFound(true);
+      } else {
+        setIsSearchedTagFound(false);
+      }
 
-    if (foundTag.length < 1 && e.target.value.trim() !== "") {
-      setIsSearchedTagFound(true);
-    } else {
-      setIsSearchedTagFound(false);
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      tags: foundTag.map((tag) => tag),
-    }));
+      console.log({ foundTags });
+      setFormData((prev) => ({ ...prev, tags: foundTags }));
+    });
   };
   const handleAddNewTag = () => {
-    if (
-      searchTagInputValue &&
-      !tags.some((tag) => tag.value === searchTagInputValue)
-    ) {
-      const newTag = {
-        id: new Date().getTime(),
-        value: searchTagInputValue,
-        label: searchTagInputValue,
-      };
+    createTag(searchTagInputValue).then((tag) => {
+      setTags((prevTags) => [tag, ...prevTags]);
+      setFetchedTags((prevTags) => [tag, ...prevTags]);
 
-      setTags((prevTags) => [newTag, ...prevTags]);
-    }
+      getTagsByFilter(searchTagInputValue).then((foundTags) => {
+        if (foundTags.length < 1 && searchTagInputValue.trim() !== "") {
+          setIsSearchedTagFound(true);
+        } else {
+          setIsSearchedTagFound(false);
+        }
+
+        setFormData((prev) => ({ ...prev, tags: foundTags }));
+      });
+    });
+
+    // if (
+    //   searchTagInputValue &&
+    //   !tags.some((tag) => tag.value === searchTagInputValue)
+    // ) {
+    //   const newTag = {
+    //     id: new Date().getTime(),
+    //     value: searchTagInputValue,
+    //     label: searchTagInputValue,
+    //   };
+
+    //   setTags((prevTags) => [newTag, ...prevTags]);
+    // }
   };
   console.log(newTag);
 
-  const onAddressChange =(e)=>{
-    setAddressValue(e.target.value)
-  }
+  const onAddressChange = (e) => {
+    setAddressValue(e.target.value);
+  };
   // const handleRadiusChange =(e)=>{
   //   setFormData((prev)=>({...prev,radius:e.target.value}))
   //   // setSliderValues((prev)=>({...prev,radiusSlider:e.target.value}))
   // }
+
+  const [fetchedCategory, setFetchedCategory] = useState([]);
+  const [fetchedIndustry, setFetchedIndustry] = useState([]);
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        const category = await getCategory();
+        setFetchedCategory(category);
+      } catch (error) {
+        console.log("error:", error);
+      }
+    };
+    const fetchIndustry = async () => {
+      try {
+        const industry = await getIndustry();
+        setFetchedIndustry(industry);
+      } catch (error) {
+        console.log("error:", error);
+      }
+    };
+    const fetchTags = async () => {
+      try {
+        const tags = await getTags();
+        setFetchedTags(tags);
+      } catch (error) {
+        console.log("error:", error);
+      }
+    };
+    fetchCategory();
+    fetchIndustry();
+    fetchTags();
+  }, []);
 
   if (!isInitialized) {
     return;
   }
   if (loadError) return "Error";
   if (!isLoaded) return "Loading...";
+
   return (
     <>
       <Card className="prevent-select">
@@ -434,9 +480,12 @@ const ExploreForm = ({ onSubmit, loading }) => {
                 {...register("opportunity_type")}
                 placeholder="Select Opportunity Type"
               >
-                {opportunityTypeChoices.map((choice) => (
-                  <Select.Option key={choice.value} value={choice.value}>
-                    {choice.label}
+                {fetchedCategory.map((choice) => (
+                  <Select.Option
+                    key={choice.id.toString()}
+                    value={choice.id.toString()}
+                  >
+                    {choice.name}
                   </Select.Option>
                 ))}
               </Select>
@@ -450,9 +499,12 @@ const ExploreForm = ({ onSubmit, loading }) => {
                 placeholder="Select Industry"
                 {...register("industry")}
               >
-                {industryChoices.map((choice) => (
-                  <Select.Option key={choice.value} value={choice.value}>
-                    {choice.label}
+                {fetchedIndustry.map((choice) => (
+                  <Select.Option
+                    key={choice.id.toString()}
+                    value={choice.id.toString()}
+                  >
+                    {choice.name}
                   </Select.Option>
                 ))}
               </Select>
@@ -555,8 +607,8 @@ const ExploreForm = ({ onSubmit, loading }) => {
                   />
                 }
                 formDataTags={formData.tags}
-                formData={formData}
-                tagChoices={tags}
+                formData={fetchedTags}
+                tagChoices={fetchedTags}
                 handleAddNewTag={handleAddNewTag}
                 isSearchedTagFound={isSearchedTagFound}
               />
@@ -588,7 +640,7 @@ const ExploreForm = ({ onSubmit, loading }) => {
             </Collapse>
 
             <Collapse title="Distance" bordered>
-            {/* <Search selectedLocation={selectedLocation} searchLocationValue={searchLocationValue} markers={markers} clickedLocation={clickedLocation} panTo={panTo} /> */}
+              {/* <Search selectedLocation={selectedLocation} searchLocationValue={searchLocationValue} markers={markers} clickedLocation={clickedLocation} panTo={panTo} /> */}
               {/* <Spacer h={1}></Spacer> */}
               <div
                 style={{
@@ -627,14 +679,20 @@ const ExploreForm = ({ onSubmit, loading }) => {
                   }}
                   onChange={onAddressChange}
                 /> */}
-                  <Search selectedLocation={selectedLocation} searchLocationValue={searchLocationValue} markers={markers} clickedLocation={clickedLocation} panTo={panTo} />
+                <Search
+                  selectedLocation={selectedLocation}
+                  searchLocationValue={searchLocationValue}
+                  markers={markers}
+                  clickedLocation={clickedLocation}
+                  panTo={panTo}
+                />
               </div>
               <div
-              style={{
-                display:"none"
-              }} 
+                style={{
+                  display: "none",
+                }}
               >
-              <Spacer h={1}></Spacer>
+                <Spacer h={1}></Spacer>
                 <GoogleMap
                   id="map"
                   mapContainerStyle={mapContainerStyle}
@@ -660,7 +718,7 @@ const ExploreForm = ({ onSubmit, loading }) => {
                         // }}
                       />
                       <Circle
-                      // key={`${marker.lat}-${marker.lng}`}
+                        // key={`${marker.lat}-${marker.lng}`}
                         center={{ lat: marker.lat, lng: marker.lng }}
                         radius={sliderValues.radiusSlider}
                         options={circleOptions}
@@ -776,7 +834,13 @@ const ExploreForm = ({ onSubmit, loading }) => {
 
 export default ExploreForm;
 
-const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clickedLocation}) => {
+const Search = ({
+  panTo,
+  selectedLocation,
+  searchLocationValue,
+  markers,
+  clickedLocation,
+}) => {
   const {
     ready,
     value,
@@ -825,27 +889,25 @@ const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clicked
   const { street_name, route, area, postal_code, city, country } =
     selectedLocation;
 
-
-
-      useEffect(() => {
-        const fetchAddress = async () => {
-          if (markers.length > 0) {
-            const lastMarker = markers[markers.length - 1]; // Get the latest marker
-            try {
-              const results = await getGeocode({ location: lastMarker });
-              if (results.length > 0) {
-                const address = results[0].formatted_address;
-                setValue(address); // Update the search input
-              }
-            } catch (error) {
-              console.log("Error getting address: ", error);
-            }
+  useEffect(() => {
+    const fetchAddress = async () => {
+      if (markers.length > 0) {
+        const lastMarker = markers[markers.length - 1]; // Get the latest marker
+        try {
+          const results = await getGeocode({ location: lastMarker });
+          if (results.length > 0) {
+            const address = results[0].formatted_address;
+            setValue(address); // Update the search input
           }
-        };
-    
-        fetchAddress();
-        setTimeout(() => setValue(null), 10);
-      }, [markers]); // Run effect when markers change
+        } catch (error) {
+          console.log("Error getting address: ", error);
+        }
+      }
+    };
+
+    fetchAddress();
+    setTimeout(() => setValue(null), 10);
+  }, [markers]); // Run effect when markers change
 
   return (
     <div
@@ -856,7 +918,7 @@ const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clicked
       }}
     >
       <Input
-        value={value||""}
+        value={value || ""}
         onChange={handleInput}
         disabled={!ready}
         placeholder="Search your location"
@@ -882,7 +944,7 @@ const Search = ({ panTo, selectedLocation ,searchLocationValue ,markers ,clicked
             data.map((mapData) => (
               // console.log(mapData,"map")
               <li
-              key={mapData.id}
+                key={mapData.id}
                 style={{
                   listStyleType: "none",
                 }}
