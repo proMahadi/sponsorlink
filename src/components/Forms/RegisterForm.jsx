@@ -24,6 +24,7 @@ import { useFieldArray, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
+
 // google maps imports & variables
 import {
   GoogleMap,
@@ -130,25 +131,25 @@ const INITIAL_DATA = {
   specialized_tags: [],
 }
 
-const CreateProfileSchema = z.object({
-  first_name: z.string().min(1, 'first name is required'),
-  last_name: z.string().min(1, 'last name is required'),
-  username: z.string().min(1, 'username is required'),
-  phone: z.string().min(1, 'phone number is required'),
-  address: z.string().min(1, 'address is required'),
-  city: z.string().min(1, 'city is required'),
-  country: z.string().min(1, 'country is required'),
-  user_type: z.string().min(1, 'user type is required'),
-  industryChoices: z.string().min(1, 'industry field is required'),
-  tagChoices: z.string().min(1, 'minimum 1 tag is required'),
-  // Same social media fields as before, just renamed
-  linkedin: z.string().optional(),
-  twitter: z.string().optional(),
-  instagram: z.string().optional(),
-  facebook: z.string().optional(),
-  youtube: z.string().optional(),
-  tiktok: z.string().optional(),
-})
+// const CreateProfileSchema = z.object({
+//   first_name: z.string().min(1, 'first name is required'),
+//   last_name: z.string().min(1, 'last name is required'),
+//   username: z.string().min(1, 'username is required'),
+//   phone: z.string().min(1, 'phone number is required'),
+//   address: z.string().min(1, 'address is required'),
+//   city: z.string().min(1, 'city is required'),
+//   country: z.string().min(1, 'country is required'),
+//   user_type: z.string().min(1, 'user type is required'),
+//   industryChoices: z.string().min(1, 'industry field is required'),
+//   tagChoices: z.string().min(1, 'minimum 1 tag is required'),
+//   // Same social media fields as before, just renamed
+//   linkedin: z.string().optional(),
+//   twitter: z.string().optional(),
+//   instagram: z.string().optional(),
+//   facebook: z.string().optional(),
+//   youtube: z.string().optional(),
+//   tiktok: z.string().optional(),
+// })
 
 export default function RegiserForm({ User, setUser }) {
   const [industries, setIndustries] = useState([])
@@ -189,7 +190,7 @@ export default function RegiserForm({ User, setUser }) {
   const [searchLocationValue, setSearchLocationValue] = useState('')
   const clickedLocation = markers.map((marker) => marker)
 
-  console.log(selectedLocation)
+  // console.log(selectedLocation)
 
   const fetchGeocodeResults = async () => {
     try {
@@ -204,7 +205,7 @@ export default function RegiserForm({ User, setUser }) {
         if (result.length > 0) {
           const addressComponents = result[0].address_components
 
-          console.log(addressComponents, 'address component')
+          // console.log(addressComponents, 'address component')
 
           let city = ''
           let country = ''
@@ -248,20 +249,20 @@ export default function RegiserForm({ User, setUser }) {
             })
           })
 
-          console.log(
-            'City:',
-            city,
-            'Country:',
-            country,
-            'Area:',
-            area,
-            'route:',
-            route,
-            'postal:',
-            postal_code,
-            'street name:',
-            street_name
-          )
+          // console.log(
+          //   'City:',
+          //   city,
+          //   'Country:',
+          //   country,
+          //   'Area:',
+          //   area,
+          //   'route:',
+          //   route,
+          //   'postal:',
+          //   postal_code,
+          //   'street name:',
+          //   street_name
+          // )
         }
       })
     } catch (error) {
@@ -277,8 +278,8 @@ export default function RegiserForm({ User, setUser }) {
   // }, [markers]);
 
   const onMapClick = useCallback((e) => {
-    console.log(e.latLng.lat(), 'latitude')
-    console.log(e.latLng.lng(), 'longitude')
+    // console.log(e.latLng.lat(), 'latitude')
+    // console.log(e.latLng.lng(), 'longitude')
     setMarkers((current) => [
       // ...current,
       {
@@ -336,35 +337,35 @@ export default function RegiserForm({ User, setUser }) {
     ])
   }, [])
 
-  const {
-    register,
-    handleSubmit,
-    getValues,
-    control,
-    formState: { errors, isLoading, isSubmitting },
-  } = useForm({
-    defaultValues: {
-      first_name: '',
-      last_name: '',
-      username: '',
-      phone: '',
-      address: '',
-      city: '',
-      country: '',
-      user_type: '',
-      industryChoices: '',
-      tags: [],
-      linkedin: '',
-      twitter: '',
-      instagram: '',
-      facebook: '',
-      youtube: '',
-      tiktok: '',
-      bio: '',
-      opportunities: false,
-      location: '',
-    },
-  })
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   getValues,
+  //   control,
+  //   formState: { errors, isLoading, isSubmitting },
+  // } = useForm({
+  //   defaultValues: {
+  //     first_name: '',
+  //     last_name: '',
+  //     username: '',
+  //     phone: '',
+  //     address: '',
+  //     city: '',
+  //     country: '',
+  //     user_type: '',
+  //     industryChoices: '',
+  //     tags: [],
+  //     linkedin: '',
+  //     twitter: '',
+  //     instagram: '',
+  //     facebook: '',
+  //     youtube: '',
+  //     tiktok: '',
+  //     bio: '',
+  //     opportunities: false,
+  //     location: '',
+  //   },
+  // })
 
   // const { fields } = useFieldArray({
   //   control,
@@ -403,30 +404,32 @@ export default function RegiserForm({ User, setUser }) {
 
   const navigate = useNavigate()
   const { setProfile } = useAuthContext()
-  const onSubmit = async (e) => {
-    const { first_name, surname, phone_number, address } = getValues()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    // const { first_name, surname, phone_number, address } = getValues()
 
     try {
       await updateProfile(
         {
-          first_name: first_name,
-          last_name: surname,
+          first_name: formData.first_name,
+          last_name: formData.surname,
         },
         {
-          phone_number: '',
-          address: '',
-          city: '',
-          country: '',
-          user_type: '',
-          industryChoices: '',
-          tags: [],
-          linkedin: '',
-          github: '',
-          twitter: '',
-          instagram: '',
-          youtube: '',
-          tiktok: '',
-        }
+          phone_number: formData.phone,
+          address: selectedLocation.address,
+          city: selectedLocation.city,
+          country: selectedLocation.country,
+          user_type: formData.user_type,
+          linkedin: formData.linkedin,
+          github: formData.github,
+          twitter: formData.twitter,
+          instagram: formData.instagram,
+          youtube: formData.youtube,
+          tiktok: formData.tiktok,
+        },
+        formData.industry?  Number(formData.industry):undefined,
+        formData.tags.map(Number)
       )
 
       setProfile((prev) => ({ ...prev, is_first_time: false }))
@@ -434,6 +437,13 @@ export default function RegiserForm({ User, setUser }) {
     } catch (error) {
       console.log('error:', error)
     }
+
+    // console.log(formData,"form data")
+
+    // alert("boom")
+    console.log(formData,"formData")
+    console.log(selectedLocation,"address")
+    console.log(markers[0],"markers")
 
     // Get location data before saving
     // const { address, postcode, city, country } = formData;
@@ -569,14 +579,14 @@ export default function RegiserForm({ User, setUser }) {
           >
             <Input
               width="100%"
-              //   value={formData.first_name}
-              //   onChange={(e) => handleInputChange("first_name", e.target.value)}
+                value={formData.first_name}
+                onChange={(e) => handleInputChange("first_name", e.target.value)}
               placeholder="John"
-              {...register('first_name')}
+              // {...register('first_name')}
             >
               First Name
             </Input>
-            {errors.first_name && (
+            {/* {errors.first_name && (
               <p
                 style={{
                   color: 'red',
@@ -585,7 +595,7 @@ export default function RegiserForm({ User, setUser }) {
               >
                 {errors.first_name.message}
               </p>
-            )}
+            )} */}
           </div>
           <div
             style={{
@@ -594,14 +604,14 @@ export default function RegiserForm({ User, setUser }) {
           >
             <Input
               width="100%"
-              //   value={formData.surname}
-              //   onChange={(e) => handleInputChange("surname", e.target.value)}
+                value={formData.surname}
+                onChange={(e) => handleInputChange("surname", e.target.value)}
               placeholder="Smith"
-              {...register('last_name')}
+              // {...register('last_name')}
             >
               Surname
             </Input>
-            {errors.last_name && (
+            {/* {errors.last_name && (
               <p
                 style={{
                   color: 'red',
@@ -610,7 +620,7 @@ export default function RegiserForm({ User, setUser }) {
               >
                 {errors.last_name.message}
               </p>
-            )}
+            )} */}
           </div>
         </div>
         <br />
@@ -623,14 +633,14 @@ export default function RegiserForm({ User, setUser }) {
           >
             <Input
               width="100%"
-              //   value={formData.username}
-              //   onChange={(e) => handleInputChange("username", e.target.value)}
+                value={formData.username}
+                onChange={(e) => handleInputChange("username", e.target.value)}
               placeholder="johnsmith1988"
-              {...register('username')}
+              // {...register('username')}
             >
               Username
             </Input>
-            {errors.username && (
+            {/* {errors.username && (
               <p
                 style={{
                   color: 'red',
@@ -639,7 +649,7 @@ export default function RegiserForm({ User, setUser }) {
               >
                 {errors.username.message}
               </p>
-            )}
+            )} */}
           </div>
           <div
             style={{
@@ -649,14 +659,14 @@ export default function RegiserForm({ User, setUser }) {
             <Input
               width="100%"
               icon={<Phone />}
-              //   value={formData.phone}
-              //   onChange={(e) => handleInputChange("phone", e.target.value)}
+                value={formData.phone}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
               placeholder="+44 123 456 7890"
-              {...register('phone')}
+              // {...register('phone')}
             >
               Phone Number
             </Input>
-            {errors.phone && (
+            {/* {errors.phone && (
               <p
                 style={{
                   color: 'red',
@@ -665,7 +675,7 @@ export default function RegiserForm({ User, setUser }) {
               >
                 {errors.phone.message}
               </p>
-            )}
+            )} */}
           </div>
         </div>
         <br />
@@ -820,15 +830,15 @@ export default function RegiserForm({ User, setUser }) {
           <Select
             width="98.6%"
             placeholder="Select User Type"
-            //   value={formData.user_type}
-            //   onChange={(val) => handleInputChange("user_type", val)}
-            {...register('user_type')}
+              value={formData.user_type}
+              onChange={(val) => handleInputChange("user_type", val)}
+            // {...register('user_type')}
           >
             <Select.Option value="individual">Individual</Select.Option>
             <Select.Option value="business">Business</Select.Option>
             <Select.Option value="influencer">Influencer</Select.Option>
           </Select>
-          {errors.user_type && (
+          {/* {errors.user_type && (
             <p
               style={{
                 color: 'red',
@@ -837,16 +847,16 @@ export default function RegiserForm({ User, setUser }) {
             >
               {errors.user_type.message}
             </p>
-          )}
+          )} */}
         </div>
 
         <div style={{ width: '100%' }}>
           <Select
             width="98.6%"
             placeholder="Select Industry"
-            //   value={formData.industry}
-            //   onChange={(val) => handleInputChange("industry", val)}
-            {...register('industryChoices')}
+              value={formData.industry}
+              onChange={(val) => handleInputChange("industry", val)}
+            // {...register('industryChoices')}
           >
             {industries.map((choice) => (
               <Select.Option key={String(choice.id)} value={String(choice.id)}>
@@ -864,11 +874,11 @@ export default function RegiserForm({ User, setUser }) {
           <Select
             width="98.6%"
             placeholder="Select Tags"
-            //   value={formData.tags}
-            //   onChange={(val) => handleInputChange("tags", val)}
+              value={formData.tags}
+              onChange={(val) => handleInputChange("tags", val)}
             multiple
             scale={0.9}
-            {...register('tags')}
+            // {...register('tags')}
           >
             {tags.map((choice) => (
               <Select.Option key={String(choice.id)} value={String(choice.id)}>
@@ -898,10 +908,10 @@ export default function RegiserForm({ User, setUser }) {
         <label>Bio</label>
         <Textarea
           width="100%"
-          //   value={formData.bio}
-          //   onChange={(e) => handleInputChange("bio", e.target.value)}
+            value={formData.bio}
+            onChange={(e) => handleInputChange("bio", e.target.value)}
           placeholder="Enter Bio"
-          {...register('bio')}
+          // {...register('bio')}
         />
       </div>
 
@@ -917,14 +927,14 @@ export default function RegiserForm({ User, setUser }) {
           <Input
             width="100%"
             icon={<Linkedin />}
-            // value={formData.linkedin}
-            // onChange={(e) => handleInputChange("linkedin", e.target.value)}
+            value={formData.linkedin}
+            onChange={(e) => handleInputChange("linkedin", e.target.value)}
             placeholder="LinkedIn URL"
-            {...register('linkedin')}
+            // {...register('linkedin')}
           >
             LinkedIn
           </Input>
-          {errors.linkedin && (
+          {/* {errors.linkedin && (
             <p
               style={{
                 color: 'red',
@@ -933,20 +943,20 @@ export default function RegiserForm({ User, setUser }) {
             >
               {errors.linkedin.message}
             </p>
-          )}
+          )} */}
         </div>
         <div>
           <Input
             width="100%"
             icon={<Github />}
-            // value={formData.github}
-            // onChange={(e) => handleInputChange("github", e.target.value)}
+            value={formData.github}
+            onChange={(e) => handleInputChange("github", e.target.value)}
             placeholder="GitHub URL"
-            {...register('facebook')}
+            // {...register('facebook')}
           >
             GitHub
           </Input>
-          {errors.facebook && (
+          {/* {errors.facebook && (
             <p
               style={{
                 color: 'red',
@@ -955,20 +965,20 @@ export default function RegiserForm({ User, setUser }) {
             >
               {errors.facebook.message}
             </p>
-          )}
+          )} */}
         </div>
         <div>
           <Input
             width="100%"
             icon={<Twitter />}
-            // value={formData.twitter}
-            // onChange={(e) => handleInputChange("twitter", e.target.value)}
+            value={formData.twitter}
+            onChange={(e) => handleInputChange("twitter", e.target.value)}
             placeholder="Twitter URL"
-            {...register('twitter')}
+            // {...register('twitter')}
           >
             Twitter
           </Input>
-          {errors.twitter && (
+          {/* {errors.twitter && (
             <p
               style={{
                 color: 'red',
@@ -977,20 +987,20 @@ export default function RegiserForm({ User, setUser }) {
             >
               {errors.twitter.message}
             </p>
-          )}
+          )} */}
         </div>
         <div>
           <Input
             width="100%"
             icon={<ExternalLink />}
-            // value={formData.instagram}
-            // onChange={(e) => handleInputChange("instagram", e.target.value)}
+            value={formData.instagram}
+            onChange={(e) => handleInputChange("instagram", e.target.value)}
             placeholder="Instagram URL"
-            {...register('instagram')}
+            // {...register('instagram')}
           >
             Instagram
           </Input>
-          {errors.instagram && (
+          {/* {errors.instagram && (
             <p
               style={{
                 color: 'red',
@@ -999,20 +1009,20 @@ export default function RegiserForm({ User, setUser }) {
             >
               {errors.instagram.message}
             </p>
-          )}
+          )} */}
         </div>
         <div>
           <Input
             width="100%"
             icon={<ExternalLink />}
-            // value={formData.youtube}
-            // onChange={(e) => handleInputChange("youtube", e.target.value)}
+            value={formData.youtube}
+            onChange={(e) => handleInputChange("youtube", e.target.value)}
             placeholder="YouTube URL"
-            {...register('youtube')}
+            // {...register('youtube')}
           >
             YouTube
           </Input>
-          {errors.youtube && (
+          {/* {errors.youtube && (
             <p
               style={{
                 color: 'red',
@@ -1021,20 +1031,20 @@ export default function RegiserForm({ User, setUser }) {
             >
               {errors.youtube.message}
             </p>
-          )}
+          )} */}
         </div>
         <div>
           <Input
             width="100%"
             icon={<ExternalLink />}
-            // value={formData.tiktok}
-            // onChange={(e) => handleInputChange("tiktok", e.target.value)}
+            value={formData.tiktok}
+            onChange={(e) => handleInputChange("tiktok", e.target.value)}
             placeholder="TikTok URL"
-            {...register('tiktok')}
+            // {...register('tiktok')}
           >
             TikTok
           </Input>
-          {errors.tiktok && (
+          {/* {errors.tiktok && (
             <p
               style={{
                 color: 'red',
@@ -1043,7 +1053,7 @@ export default function RegiserForm({ User, setUser }) {
             >
               {errors.tiktok.message}
             </p>
-          )}
+          )} */}
         </div>
       </div>
       <br />
@@ -1085,7 +1095,7 @@ export default function RegiserForm({ User, setUser }) {
         </h1>
         {renderStepNavigation()}
       </div>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit}>
         {currentStep === 'personal' && renderPersonalInfo()}
         {currentStep === 'contact' && renderContactInfo()}
         {currentStep === 'profile' && renderProfileDetails()}
@@ -1143,7 +1153,7 @@ const Search = ({
       const { lat, lng } = await getLatLng(results[0])
       panTo({ lat, lng })
     } catch (error) {
-      console.log('😱 Error: ', error)
+      // console.log('😱 Error: ', error)
     }
   }
   const { street_name, route, area, postal_code, city, country } =
@@ -1174,7 +1184,7 @@ const Search = ({
             setValue(address) // Update the search input
           }
         } catch (error) {
-          console.log('Error getting address: ', error)
+          // console.log('Error getting address: ', error)
         }
       }
     }
