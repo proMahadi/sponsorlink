@@ -15,27 +15,31 @@ import { getCurrentUser } from "@/api/user";
 const INITIAL_DATA = {
   name: "",
   first_name: "",
-  surname: "",
+  last_name: "", // Note: you're using surname in some places and last_name in others
   email: "",
-  phone: "",
-  profile_image: "",
-  country: "",
-  address: "",
-  postcode: "",
-  city: "",
-  available: null,
   username: "",
-  bio: "",
-  user_type: "",
-  industry: "",
-  linkedin: "",
-  github: "",
-  twitter: "",
-  instagram: "",
-  youtube: "",
-  tiktok: "",
+  profile: {
+    phone: "",
+    profile_image: "",
+    country: "",
+    address: "",
+    postcode: "",
+    city: "",
+    opportunities: false, // corresponds to "available" in your code
+    bio: "",
+    user_type: "",
+    industry: "",
+    social_links: {
+      linkedin: "",
+      github: "",
+      twitter: "",
+      instagram: "",
+      youtube: "",
+      tiktok: ""
+    }
+  },
   tags: [],
-  specialized_tags: [],
+  specialized_tags: []
 };
 
 const ProfileSection = ({ title, subtitle, children }) => {
@@ -73,7 +77,7 @@ const PersonalInfoForm = ({
         </Input>
         <Input
           name="surname"
-          value={formData.surname}
+          value={formData.last_name}
           onChange={onInputChange}
           placeholder="Surname"
           width="100%"
@@ -98,7 +102,7 @@ const PersonalInfoForm = ({
         <Input
           icon={<Phone />}
           name="phone"
-          value={formData.phone}
+          value={formData.profile.phone}
           onChange={onInputChange}
           placeholder="Phone number"
           width="100%"
@@ -111,7 +115,7 @@ const PersonalInfoForm = ({
       <div className="card-row">
         <Input
           name="address"
-          value={formData.address}
+          value={formData.profile.address}
           onChange={onInputChange}
           placeholder="Address"
           width="100%"
@@ -134,7 +138,7 @@ const PersonalInfoForm = ({
         </Input>
         <Input
           name="city"
-          value={formData.city}
+          value={formData.profile.city}
           onChange={onInputChange}
           placeholder="City"
           width="100%"
@@ -145,7 +149,7 @@ const PersonalInfoForm = ({
         <div className="card-select">
           <div className="select-label">Country</div>
           <Select
-            value={formData.country}
+            initialValue={formData.profile.country}
             onChange={(val) => onSelectChange(val, "country")}
             placeholder="Country"
             width="100%"
@@ -176,7 +180,7 @@ const ProfileInfoForm = ({
       <div className="card-row">
         <div className="toggle-row">
           <Toggle
-            checked={formData.available}
+            checked={formData.profile.opportunities}
             onChange={(e) => onSelectChange(e.target.checked, "available")}
             disabled={!editMode}
             color="green"
@@ -206,7 +210,7 @@ const ProfileInfoForm = ({
           <div className="select-label">Bio</div>
           <Textarea
             name="bio"
-            value={formData.bio}
+            value={formData.profile.bio}
             onChange={(e) => onSelectChange(e.target.value, "bio")}
             placeholder="Bio"
             width="100%"
@@ -222,7 +226,7 @@ const ProfileInfoForm = ({
         <div className="card-select" style={{ width: "50%" }}>
           <div className="select-label">User Type</div>
           <Select
-            value={formData.user_type}
+            value={formData.profile.user_type}
             onChange={(val) => onSelectChange(val, "user_type")}
             placeholder="Select user type"
             width="100%"
@@ -256,7 +260,7 @@ const ProfileInfoForm = ({
         <Input
           name="twitter"
           icon={<Twitter />}
-          value={formData.twitter}
+          value={formData.profile.social_links.twitter}
           onChange={onInputChange}
           placeholder="Twitter"
           width="100%"
@@ -267,7 +271,7 @@ const ProfileInfoForm = ({
         <Input
           name="linkedin"
           icon={<Linkedin />}
-          value={formData.linkedin}
+          value={formData.profile.social_links.linkedin}
           onChange={onInputChange}
           placeholder="LinkedIn"
           width="100%"
@@ -278,7 +282,7 @@ const ProfileInfoForm = ({
         <Input
           name="github"
           icon={<Github />}
-          value={formData.github}
+          value={formData.profile.social_links.github}
           onChange={onInputChange}
           placeholder="GitHub"
           width="100%"
@@ -292,7 +296,7 @@ const ProfileInfoForm = ({
         <Input
           name="instagram"
           icon={<ExternalLink />}
-          value={formData.instagram}
+          value={formData.profile.social_links.instagram}
           onChange={onInputChange}
           placeholder="Instagram"
           width="100%"
@@ -303,7 +307,7 @@ const ProfileInfoForm = ({
         <Input
           name="youtube"
           icon={<ExternalLink />}
-          value={formData.youtube}
+          value={formData.profile.social_links.youtube}
           onChange={onInputChange}
           placeholder="YouTube"
           width="100%"
@@ -314,7 +318,7 @@ const ProfileInfoForm = ({
         <Input
           name="tiktok"
           icon={<ExternalLink />}
-          value={formData.tiktok}
+          value={formData.profile.social_links.tiktok}
           onChange={onInputChange}
           placeholder="TikTok"
           width="100%"
@@ -330,10 +334,10 @@ const ProfileInfoForm = ({
           <div style={{ display: "flex", gap: "20px" }}>
             <Select
               multiple
-              value={formData.tags}
+              value={["tag1", "tag2"]}
               onChange={(val) => onSelectChange(val, "tags")}
               placeholder="General tags"
-              width="50%"
+              width="100%"
               disabled={!editMode}
             >
               {tagChoices.map((choice) => (
@@ -342,20 +346,20 @@ const ProfileInfoForm = ({
                 </Select.Option>
               ))}
             </Select>
-            <Select
-              multiple
-              value={formData.specialized_tags}
-              onChange={(val) => onSelectChange(val, "specialized_tags")}
-              placeholder="Specialised tags"
-              width="50%"
-              disabled={!editMode}
-            >
-              {tagChoices.map((choice) => (
-                <Select.Option key={choice.value} value={choice.value}>
-                  {choice.label}
-                </Select.Option>
-              ))}
-            </Select>
+            {/*<Select*/}
+            {/*  multiple*/}
+            {/*  value={formData.specialized_tags}*/}
+            {/*  onChange={(val) => onSelectChange(val, "specialized_tags")}*/}
+            {/*  placeholder="Specialised tags"*/}
+            {/*  width="50%"*/}
+            {/*  disabled={!editMode}*/}
+            {/*>*/}
+            {/*  {tagChoices.map((choice) => (*/}
+            {/*    <Select.Option key={choice.value} value={choice.value}>*/}
+            {/*      {choice.label}*/}
+            {/*    </Select.Option>*/}
+            {/*  ))}*/}
+            {/*</Select>*/}
           </div>
         </div>
       </div>
@@ -387,6 +391,8 @@ function Profile() {
     fetchCurrentUser()
     console.log(userData,"userData")
   }, []);
+
+  console.log(userData)
 
   const handleImageClick = () => {
     setEditMode(true);
@@ -488,7 +494,7 @@ function Profile() {
           <img
             width="150px"
             height="150px"
-            src={userData.profile_image}
+            src={userData.profile.profile_image}
             alt="No Image"
             className={`profile-image ${
               editMode ? "profile-image-editable" : ""
