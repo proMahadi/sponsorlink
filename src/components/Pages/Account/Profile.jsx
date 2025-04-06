@@ -11,12 +11,15 @@ import {
 } from "@geist-ui/icons";
 import { industryChoices, countryChoices, tagChoices } from "@/utils/constants";
 import { getCurrentUser } from "@/api/user";
+import {getIndustry} from "@/api/industry.js";
+import {getTags} from "@/api/tags.js";
 
 const INITIAL_DATA = {
   name: "",
   first_name: "",
-  last_name: "", // Note: you're using surname in some places and last_name in others
+  last_name: "",
   email: "",
+  industries: [],
   username: "",
   profile: {
     phone: "",
@@ -25,10 +28,9 @@ const INITIAL_DATA = {
     address: "",
     postcode: "",
     city: "",
-    opportunities: false, // corresponds to "available" in your code
+    opportunities: false,
     bio: "",
     user_type: "",
-    industry: "",
     social_links: {
       linkedin: "",
       github: "",
@@ -38,8 +40,7 @@ const INITIAL_DATA = {
       tiktok: ""
     }
   },
-  tags: [],
-  specialized_tags: []
+  tags: []
 };
 
 const ProfileSection = ({ title, subtitle, children }) => {
@@ -125,44 +126,44 @@ const PersonalInfoForm = ({
         </Input>
       </div>
 
-      <div className="card-row">
-        <Input
-          name="postcode"
-          value={formData.postcode}
-          onChange={onInputChange}
-          placeholder="Postcode/ZIP"
-          width="100%"
-          readOnly={!editMode}
-        >
-          Postcode/ZIP
-        </Input>
-        <Input
-          name="city"
-          value={formData.profile.city}
-          onChange={onInputChange}
-          placeholder="City"
-          width="100%"
-          readOnly={!editMode}
-        >
-          City
-        </Input>
-        <div className="card-select">
-          <div className="select-label">Country</div>
-          <Select
-            initialValue={formData.profile.country}
-            onChange={(val) => onSelectChange(val, "country")}
-            placeholder="Country"
-            width="100%"
-            disabled={!editMode}
-          >
-            {countryChoices.map((choice) => (
-              <Select.Option key={choice.value} value={choice.value}>
-                {choice.label}
-              </Select.Option>
-            ))}
-          </Select>
-        </div>
-      </div>
+      {/*<div className="card-row">*/}
+      {/*  <Input*/}
+      {/*    name="postcode"*/}
+      {/*    value={formData.postcode}*/}
+      {/*    onChange={onInputChange}*/}
+      {/*    placeholder="Postcode/ZIP"*/}
+      {/*    width="100%"*/}
+      {/*    readOnly={!editMode}*/}
+      {/*  >*/}
+      {/*    Postcode/ZIP*/}
+      {/*  </Input>*/}
+      {/*  <Input*/}
+      {/*    name="city"*/}
+      {/*    value={formData.profile.city}*/}
+      {/*    onChange={onInputChange}*/}
+      {/*    placeholder="City"*/}
+      {/*    width="100%"*/}
+      {/*    readOnly={!editMode}*/}
+      {/*  >*/}
+      {/*    City*/}
+      {/*  </Input>*/}
+      {/*  <div className="card-select">*/}
+      {/*    <div className="select-label">Country</div>*/}
+      {/*    <Select*/}
+      {/*      initialValue={formData.profile.country}*/}
+      {/*      onChange={(val) => onSelectChange(val, "country")}*/}
+      {/*      placeholder="Country"*/}
+      {/*      width="100%"*/}
+      {/*      disabled={!editMode}*/}
+      {/*    >*/}
+      {/*      {countryChoices.map((choice) => (*/}
+      {/*        <Select.Option key={choice.value} value={choice.value}>*/}
+      {/*          {choice.label}*/}
+      {/*        </Select.Option>*/}
+      {/*      ))}*/}
+      {/*    </Select>*/}
+      {/*  </div>*/}
+      {/*</div>*/}
     </>
   );
 };
@@ -170,10 +171,12 @@ const PersonalInfoForm = ({
 const ProfileInfoForm = ({
   formData,
   editMode,
+  tags,
+  industries,
   onInputChange,
   onSelectChange,
 }) => {
-  const bioCharCount = 300 - (formData.bio?.length || 0);
+  const bioCharCount = 300 - (formData.profile.bio?.length || 0);
 
   return (
     <>
@@ -241,17 +244,17 @@ const ProfileInfoForm = ({
         <div className="card-select" style={{ width: "50%" }}>
           <div className="select-label">Industry</div>
           <Select
-            value={formData.industry}
-            onChange={(val) => onSelectChange(val, "industry")}
+            value={String(formData.industries[0]?.id)}
+            onChange={(val) => onSelectChange(val, "industries")}
             placeholder="Select industry"
             width="100%"
             disabled={!editMode}
           >
-            {industryChoices.map((choice) => (
-              <Select.Option key={choice.value} value={choice.value}>
-                {choice.label}
-              </Select.Option>
-            ))}
+              {industries.map((choice) => (
+                  <Select.Option key={String(choice.id)} value={String(choice.id)}>
+                      {choice.name}
+                  </Select.Option>
+              ))}
           </Select>
         </div>
       </div>
@@ -334,32 +337,18 @@ const ProfileInfoForm = ({
           <div style={{ display: "flex", gap: "20px" }}>
             <Select
               multiple
-              value={["tag1", "tag2"]}
+              value={formData.tags.map(tag => String(tag?.id))}
               onChange={(val) => onSelectChange(val, "tags")}
-              placeholder="General tags"
+              placeholder="Select tags"
               width="100%"
               disabled={!editMode}
             >
-              {tagChoices.map((choice) => (
-                <Select.Option key={choice.value} value={choice.value}>
-                  {choice.label}
-                </Select.Option>
-              ))}
+                {tags.map((choice) => (
+                    <Select.Option key={String(choice.id)} value={String(choice.id)}>
+                        {choice.name}
+                    </Select.Option>
+                ))}
             </Select>
-            {/*<Select*/}
-            {/*  multiple*/}
-            {/*  value={formData.specialized_tags}*/}
-            {/*  onChange={(val) => onSelectChange(val, "specialized_tags")}*/}
-            {/*  placeholder="Specialised tags"*/}
-            {/*  width="50%"*/}
-            {/*  disabled={!editMode}*/}
-            {/*>*/}
-            {/*  {tagChoices.map((choice) => (*/}
-            {/*    <Select.Option key={choice.value} value={choice.value}>*/}
-            {/*      {choice.label}*/}
-            {/*    </Select.Option>*/}
-            {/*  ))}*/}
-            {/*</Select>*/}
           </div>
         </div>
       </div>
@@ -373,6 +362,18 @@ function Profile() {
   const [editMode, setEditMode] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState("");
+  const [industries, setIndustries] = useState([])
+  const [tags, setTags] = useState([])
+
+  useEffect(() => {
+    getIndustry().then((data) => {
+      setIndustries(data)
+    })
+
+    getTags().then((data) => {
+      setTags(data)
+    })
+  }, [])
 
   useEffect(() => {
     const cachedData = sessionStorage.getItem("user");
@@ -443,6 +444,7 @@ function Profile() {
   };
 
   const handleSelectChange = (value, field) => {
+    console.log(value, 'the value')
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -494,8 +496,8 @@ function Profile() {
           <img
             width="150px"
             height="150px"
-            src={userData.profile.profile_image}
-            alt="No Image"
+            src={userData.profile.profile_image ?? 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-profile-picture-business-profile-woman-suitable-social-media-profiles-icons-screensavers-as-templatex9_719432-1339.jpg'}
+            alt="profile image"
             className={`profile-image ${
               editMode ? "profile-image-editable" : ""
             }`}
@@ -553,6 +555,8 @@ function Profile() {
           <ProfileInfoForm
             formData={formData}
             editMode={editMode}
+            tags={tags}
+            industries={industries}
             onInputChange={handleInputChange}
             onSelectChange={handleSelectChange}
           />
