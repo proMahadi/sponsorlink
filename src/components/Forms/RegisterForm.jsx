@@ -37,7 +37,7 @@ import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
 } from 'use-places-autocomplete'
-import { updateProfile } from '@/api/user'
+import {getCurrentUser, updateProfile} from '@/api/user'
 import { useNavigate } from 'react-router-dom'
 import { useAuthContext } from '@/context/AuthContext'
 import { getIndustry } from '@/api/industry'
@@ -115,6 +115,7 @@ const INITIAL_DATA = {
   postcode: '',
   city: '',
   latitude: null,
+  opportunities: false,
   longitude: null,
   available: null,
   username: '',
@@ -169,6 +170,7 @@ export default function RegiserForm({ User, setUser }) {
   const [currentStep, setCurrentStep] = useState('personal') // 'personal' or 'profile'
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [tempImageUrl, setTempImageUrl] = useState('')
+  const [previewImageUrl, setPreviewImageUrl] = useState('');
 
   // google maps states hooks and functions
   const { isLoaded, loadError } = useLoadScript({
@@ -270,12 +272,21 @@ export default function RegiserForm({ User, setUser }) {
     }
   }
   // google maps states hooks and functions
-
-  // useEffect(() => {
-  //   if (markers.length > 0) {
-  //     fetchGeocodeResults();
-  //   }
-  // }, [markers]);
+  useEffect(() => {
+    if (markers.length > 0) {
+      fetchGeocodeResults().then(() => {
+        setFormData(prev => ({
+          ...prev,
+          address: selectedLocation.address,
+          city: selectedLocation.city,
+          postcode: selectedLocation.postal_code,
+          country: selectedLocation.country,
+          latitude: markers[0].lat,
+          longitude: markers[0].lng
+        }));
+      });
+    }
+  }, [markers]);
 
   const onMapClick = useCallback((e) => {
     // console.log(e.latLng.lat(), 'latitude')
@@ -400,6 +411,8 @@ export default function RegiserForm({ User, setUser }) {
 
       return updates
     })
+
+    console.log(formData)
   }
 
   const navigate = useNavigate()
@@ -427,6 +440,12 @@ export default function RegiserForm({ User, setUser }) {
           instagram: formData.instagram,
           youtube: formData.youtube,
           tiktok: formData.tiktok,
+          bio: formData.bio,
+          location: formData.address,
+          phone: formData.phone,
+          opportunities: formData.opportunities,
+          latitude: formData.latitude,
+          longitude: formData.longitude,
         },
         formData.industry?  Number(formData.industry):undefined,
         formData.tags.map(Number)
@@ -437,8 +456,6 @@ export default function RegiserForm({ User, setUser }) {
     } catch (error) {
       console.log('error:', error)
     }
-
-    // console.log(formData,"form data")
 
     // alert("boom")
     console.log(formData,"formData")
@@ -516,6 +533,25 @@ export default function RegiserForm({ User, setUser }) {
     setIsModalOpen(false)
   }
 
+  const handleOpportunityToggle = (event) => {
+    const newValue = event.target.checked;
+    console.log(newValue, 'opportunity')
+    handleInputChange('opportunities', newValue);
+  };
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      console.warn("No file selected");
+      return;
+    }
+
+    const imageUrl = URL.createObjectURL(file);
+    setPreviewImageUrl(imageUrl)
+    formData.profile_image = file
+  };
+
+
   if (loadError) return 'Error'
   if (!isLoaded) return 'Loading...'
 
@@ -532,8 +568,8 @@ export default function RegiserForm({ User, setUser }) {
           className="profile-image-circle"
           // onClick={() => setIsModalOpen(true)}
           style={{
-            backgroundImage: formData.profile_image
-              ? `url(${formData.profile_image})`
+            backgroundImage: previewImageUrl
+              ? `url(${previewImageUrl})`
               : 'none',
             position: 'relative',
             overflow: 'hidden',
@@ -543,6 +579,8 @@ export default function RegiserForm({ User, setUser }) {
           {!formData.profile_image && <Edit />}
           <input
             type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
             style={{
               position: 'absolute',
               height: '100%',
@@ -553,21 +591,21 @@ export default function RegiserForm({ User, setUser }) {
           />
         </div>
 
-        <Modal visible={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <Modal.Title>Add Profile Image URL</Modal.Title>
-          <Modal.Content>
-            <Input
-              width="100%"
-              value={tempImageUrl}
-              onChange={(e) => setTempImageUrl(e.target.value)}
-              placeholder="Enter image URL"
-            />
-          </Modal.Content>
-          <Modal.Action passive onClick={() => setIsModalOpen(false)}>
-            Cancel
-          </Modal.Action>
-          <Modal.Action onClick={handleImageSave}>Save</Modal.Action>
-        </Modal>
+        {/*<Modal visible={isModalOpen} onClose={() => setIsModalOpen(false)}>*/}
+        {/*  <Modal.Title>Add Profile Image URL</Modal.Title>*/}
+        {/*  <Modal.Content>*/}
+        {/*    <Input*/}
+        {/*      width="100%"*/}
+        {/*      value={tempImageUrl}*/}
+        {/*      onChange={(e) => setTempImageUrl(e.target.value)}*/}
+        {/*      placeholder="Enter image URL"*/}
+        {/*    />*/}
+        {/*  </Modal.Content>*/}
+        {/*  <Modal.Action passive onClick={() => setIsModalOpen(false)}>*/}
+        {/*    Cancel*/}
+        {/*  </Modal.Action>*/}
+        {/*  <Modal.Action onClick={handleImageSave}>Save</Modal.Action>*/}
+        {/*</Modal>*/}
 
         <br />
 
@@ -774,7 +812,7 @@ export default function RegiserForm({ User, setUser }) {
                     center={{ lat: marker.lat, lng: marker.lng }}
                     radius={100}
                     // options={circleOptions}
-                    
+
                     onCenterChanged={() => console.log("onCenterChanged")}
                     onRadiusChanged={() => console.log("onRadiusChanged")}
                     min={50}
@@ -816,7 +854,7 @@ export default function RegiserForm({ User, setUser }) {
       <div className="flex-fields">
         <Toggle
           checked={formData.opportunities}
-          onChange={(e) => handleInputChange('opportunities', e.target.checked)}
+          onChange={handleOpportunityToggle}
         ></Toggle>
         Available for Opportunities
       </div>
@@ -888,8 +926,8 @@ export default function RegiserForm({ User, setUser }) {
           </Select>
         </div>
 
-        {/* <Select 
-                    
+        {/* <Select
+
                     placeholder="Select Specialized Tags xyz"
                     value={formData.specialized_tags}
                     onChange={(val) => handleInputChange('specialized_tags', val)}
