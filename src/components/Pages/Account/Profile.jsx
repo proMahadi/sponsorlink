@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Divider, Input, Select, Toggle, Textarea } from "@geist-ui/core";
+import React, { useState, useEffect } from 'react'
+import { Divider, Input, Select, Toggle, Textarea } from '@geist-ui/core'
 import {
   Mail,
   Phone,
@@ -8,40 +8,41 @@ import {
   Github,
   Linkedin,
   Edit,
-} from "@geist-ui/icons";
-import { industryChoices, countryChoices, tagChoices } from "@/utils/constants";
-import { getCurrentUser } from "@/api/user";
-import {getIndustry} from "@/api/industry.js";
-import {getTags} from "@/api/tags.js";
+} from '@geist-ui/icons'
+import { industryChoices, countryChoices, tagChoices } from '@/utils/constants'
+import { getCurrentUser } from '@/api/user'
+import { getIndustry } from '@/api/industry.js'
+import { getTags } from '@/api/tags.js'
+import clientAxios from '@/api/axios'
 
 const INITIAL_DATA = {
-  name: "",
-  first_name: "",
-  last_name: "",
-  email: "",
+  name: '',
+  first_name: '',
+  last_name: '',
+  email: '',
   industries: [],
-  username: "",
+  username: '',
   profile: {
-    phone: "",
-    profile_image: "",
-    country: "",
-    address: "",
-    postcode: "",
-    city: "",
+    phone: '',
+    profile_image: '',
+    country: '',
+    address: '',
+    postcode: '',
+    city: '',
     opportunities: false,
-    bio: "",
-    user_type: "",
+    bio: '',
+    user_type: '',
     social_links: {
-      linkedin: "",
-      github: "",
-      twitter: "",
-      instagram: "",
-      youtube: "",
-      tiktok: ""
-    }
+      linkedin: '',
+      github: '',
+      twitter: '',
+      instagram: '',
+      youtube: '',
+      tiktok: '',
+    },
   },
-  tags: []
-};
+  tags: [],
+}
 
 const ProfileSection = ({ title, subtitle, children }) => {
   return (
@@ -54,8 +55,8 @@ const ProfileSection = ({ title, subtitle, children }) => {
         <div className="card-content">{children}</div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 const PersonalInfoForm = ({
   formData,
@@ -76,8 +77,9 @@ const PersonalInfoForm = ({
         >
           First name
         </Input>
+
         <Input
-          name="surname"
+          name="last_name"
           value={formData.last_name}
           onChange={onInputChange}
           placeholder="Surname"
@@ -102,7 +104,7 @@ const PersonalInfoForm = ({
         </Input>
         <Input
           icon={<Phone />}
-          name="phone"
+          name="profile.phone"
           value={formData.profile.phone}
           onChange={onInputChange}
           placeholder="Phone number"
@@ -115,7 +117,7 @@ const PersonalInfoForm = ({
 
       <div className="card-row">
         <Input
-          name="address"
+          name="profile.address"
           value={formData.profile.address}
           onChange={onInputChange}
           placeholder="Address"
@@ -165,8 +167,8 @@ const PersonalInfoForm = ({
       {/*  </div>*/}
       {/*</div>*/}
     </>
-  );
-};
+  )
+}
 
 const ProfileInfoForm = ({
   formData,
@@ -176,7 +178,7 @@ const ProfileInfoForm = ({
   onInputChange,
   onSelectChange,
 }) => {
-  const bioCharCount = 300 - (formData.profile.bio?.length || 0);
+  const bioCharCount = 300 - (formData.profile.bio?.length || 0)
 
   return (
     <>
@@ -184,7 +186,9 @@ const ProfileInfoForm = ({
         <div className="toggle-row">
           <Toggle
             checked={formData.profile.opportunities}
-            onChange={(e) => onSelectChange(e.target.checked, "available")}
+            onChange={(e) =>
+              onSelectChange(e.target.checked, 'profile.opportunities')
+            }
             disabled={!editMode}
             color="green"
           />
@@ -209,28 +213,28 @@ const ProfileInfoForm = ({
       </div>
 
       <div className="card-row">
-        <div style={{ width: "100%" }}>
+        <div style={{ width: '100%' }}>
           <div className="select-label">Bio</div>
           <Textarea
-            name="bio"
+            name="profile.bio"
             value={formData.profile.bio}
-            onChange={(e) => onSelectChange(e.target.value, "bio")}
+            onChange={(e) => onSelectChange(e.target.value, 'profile.bio')}
             placeholder="Bio"
             width="100%"
             readOnly={!editMode}
             maxLength={300}
-            style={{ minHeight: "125px" }}
+            style={{ minHeight: '125px' }}
           />
           <div className="bio-char-counter">{bioCharCount} characters left</div>
         </div>
       </div>
 
       <div className="card-row">
-        <div className="card-select" style={{ width: "50%" }}>
+        <div className="card-select" style={{ width: '50%' }}>
           <div className="select-label">User Type</div>
           <Select
             value={formData.profile.user_type}
-            onChange={(val) => onSelectChange(val, "user_type")}
+            onChange={(val) => onSelectChange(val, 'profile.user_type')}
             placeholder="Select user type"
             width="100%"
             disabled={!editMode}
@@ -241,28 +245,28 @@ const ProfileInfoForm = ({
           </Select>
         </div>
 
-        <div className="card-select" style={{ width: "50%" }}>
+        <div className="card-select" style={{ width: '50%' }}>
           <div className="select-label">Industry</div>
           <Select
             value={String(formData.industries[0]?.id)}
-            onChange={(val) => onSelectChange(val, "industries")}
+            onChange={(val) => onSelectChange(val, 'industries')}
             placeholder="Select industry"
             width="100%"
             disabled={!editMode}
           >
-              {industries.map((choice) => (
-                  <Select.Option key={String(choice.id)} value={String(choice.id)}>
-                      {choice.name}
-                  </Select.Option>
-              ))}
+            {industries.map((choice) => (
+              <Select.Option key={String(choice.id)} value={String(choice.id)}>
+                {choice.name}
+              </Select.Option>
+            ))}
           </Select>
         </div>
       </div>
 
       <div className="card-row">
         <Input
-          name="twitter"
           icon={<Twitter />}
+          name="profile.social_links.twitter"
           value={formData.profile.social_links.twitter}
           onChange={onInputChange}
           placeholder="Twitter"
@@ -272,8 +276,8 @@ const ProfileInfoForm = ({
           Twitter
         </Input>
         <Input
-          name="linkedin"
           icon={<Linkedin />}
+          name="profile.social_links.linkedin"
           value={formData.profile.social_links.linkedin}
           onChange={onInputChange}
           placeholder="LinkedIn"
@@ -283,8 +287,8 @@ const ProfileInfoForm = ({
           LinkedIn
         </Input>
         <Input
-          name="github"
           icon={<Github />}
+          name="profile.social_links.github"
           value={formData.profile.social_links.github}
           onChange={onInputChange}
           placeholder="GitHub"
@@ -297,8 +301,8 @@ const ProfileInfoForm = ({
 
       <div className="card-row">
         <Input
-          name="instagram"
           icon={<ExternalLink />}
+          name="profile.social_links.instagram"
           value={formData.profile.social_links.instagram}
           onChange={onInputChange}
           placeholder="Instagram"
@@ -308,8 +312,8 @@ const ProfileInfoForm = ({
           Instagram
         </Input>
         <Input
-          name="youtube"
           icon={<ExternalLink />}
+          name="profile.social_links.youtube"
           value={formData.profile.social_links.youtube}
           onChange={onInputChange}
           placeholder="YouTube"
@@ -319,8 +323,8 @@ const ProfileInfoForm = ({
           YouTube
         </Input>
         <Input
-          name="tiktok"
           icon={<ExternalLink />}
+          name="profile.social_links.tiktok"
           value={formData.profile.social_links.tiktok}
           onChange={onInputChange}
           placeholder="TikTok"
@@ -332,38 +336,43 @@ const ProfileInfoForm = ({
       </div>
 
       <div className="card-row">
-        <div style={{ width: "100%" }}>
+        <div style={{ width: '100%' }}>
           <div className="select-label">Tags</div>
-          <div style={{ display: "flex", gap: "20px" }}>
+          <div style={{ display: 'flex', gap: '20px' }}>
             <Select
               multiple
-              value={formData.tags.map(tag => String(tag?.id))}
-              onChange={(val) => onSelectChange(val, "tags")}
+              value={formData.tags.map((tag) => String(tag?.id))}
+              onChange={(val) => onSelectChange(val, 'tags')}
               placeholder="Select tags"
               width="100%"
               disabled={!editMode}
             >
-                {tags.map((choice) => (
-                    <Select.Option key={String(choice.id)} value={String(choice.id)}>
-                        {choice.name}
-                    </Select.Option>
-                ))}
+              {tags.map((choice) => (
+                <Select.Option
+                  key={String(choice.id)}
+                  value={String(choice.id)}
+                >
+                  {choice.name}
+                </Select.Option>
+              ))}
             </Select>
           </div>
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-function Profile() {
-  const [userData, setUserData] = useState(null);
-  const [formData, setFormData] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [imageModalVisible, setImageModalVisible] = useState(false);
-  const [tempImageUrl, setTempImageUrl] = useState("");
+export default function Profile() {
+  const [userData, setUserData] = useState(null)
+  const [formData, setFormData] = useState(null)
+  const [editMode, setEditMode] = useState(false)
+  const [imageModalVisible, setImageModalVisible] = useState(false)
+  const [tempImageUrl, setTempImageUrl] = useState('')
   const [industries, setIndustries] = useState([])
   const [tags, setTags] = useState([])
+
+  console.log(formData, userData)
 
   useEffect(() => {
     getIndustry().then((data) => {
@@ -376,117 +385,173 @@ function Profile() {
   }, [])
 
   useEffect(() => {
-    const cachedData = sessionStorage.getItem("user");
-    const initialData = cachedData ? JSON.parse(cachedData) : INITIAL_DATA;
+    const cachedData = sessionStorage.getItem('user')
+    const initialData = cachedData ? JSON.parse(cachedData) : INITIAL_DATA
 
     initialData.name = `${initialData.first_name}${
-      initialData.surname ? " " + initialData.surname : ""
-    }`;
+      initialData.surname ? ' ' + initialData.surname : ''
+    }`
     const fetchCurrentUser = async () => {
-      const currentUser = await getCurrentUser();
+      const currentUser = await getCurrentUser()
       try {
-        setUserData(currentUser);
-        setFormData(currentUser);
+        setUserData(currentUser)
+        setFormData(currentUser)
       } catch (error) {}
-    };
+    }
     fetchCurrentUser()
-    console.log(userData,"userData")
-  }, []);
+    console.log(userData, 'userData')
+  }, [])
 
   console.log(userData)
 
   const handleImageClick = () => {
-    setEditMode(true);
-    setTempImageUrl(formData.profile_image);
-    setImageModalVisible(true);
-  };
+    setEditMode(true)
+    setTempImageUrl(formData.profile_image)
+    setImageModalVisible(true)
+  }
 
   const handleImageSubmit = () => {
     setFormData((prev) => ({
       ...prev,
       profile_image: tempImageUrl,
-    }));
+    }))
     setUserData((prev) => ({
       ...prev,
       profile_image: tempImageUrl,
-    }));
+    }))
 
-    const currentData = JSON.parse(sessionStorage.getItem("user"));
+    const currentData = JSON.parse(sessionStorage.getItem('user'))
     sessionStorage.setItem(
-      "user",
+      'user',
       JSON.stringify({
         ...currentData,
         profile_image: tempImageUrl,
       })
-    );
+    )
 
-    setImageModalVisible(false);
-    setEditMode(false);
-  };
+    setImageModalVisible(false)
+    setEditMode(false)
+  }
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const newData = {
-        ...prev,
-        [name]: value,
-      };
+    const { name, value } = e.target // Here the name can be like "profile.phone..." or "first_name"
+    const keys = name.split('.')
 
-      // Update the full name when first_name or surname changes
-      if (name === "first_name" || name === "surname") {
-        newData.name = `${newData.first_name}${
-          newData.surname ? " " + newData.surname : ""
-        }`;
+    setFormData((prev) => {
+      const clonedData = structuredClone(prev)
+
+      if (name === 'first_name' || name === 'last_name') {
+        clonedData.name = [clonedData.first_name, clonedData.last_name]
+          .filter(Boolean)
+          .join(' ')
       }
 
-      return newData;
-    });
-  };
+      let current = clonedData
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) {
+          current[keys[i]] = {}
+        }
+        current = current[keys[i]]
+      }
+
+      current[keys[keys.length - 1]] = value
+      return clonedData
+    })
+  }
 
   const handleSelectChange = (value, field) => {
-    console.log(value, 'the value')
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+    setFormData((prev) => {
+      const clonedData = structuredClone(prev)
+      const keys = field.split('.')
 
-  const handleSave = () => {
-    setUserData(formData);
-    sessionStorage.setItem("user", JSON.stringify(formData));
-    setEditMode(false);
-  };
+      let current = clonedData
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) {
+          current[keys[i]] = {}
+        }
+        current = current[keys[i]]
+      }
+
+      current[keys[keys.length - 1]] = value
+      return clonedData
+    })
+  }
+
+  const handleSave = async () => {
+    // sessionStorage.setItem('user', JSON.stringify(formData))
+
+    await clientAxios.patch('/account/update-profile/', {
+      user: {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+      },
+
+      profile: {
+        bio: formData.profile.bio,
+        age: formData.profile.age,
+        phone: formData.profile.phone,
+        location: formData.profile.location,
+        birth_date: formData.profile.birth_date,
+        gender: formData.profile.gender,
+        opportunities: formData.profile.opportunities,
+        latitude: formData.profile.latitude,
+        longitude: formData.profile.longitude,
+        country: formData.profile.country,
+        city: formData.profile.city,
+        address: formData.profile.address,
+
+        facebook: formData.profile.social_links.facebook,
+        instagram: formData.profile.social_links.instagram,
+        twitter: formData.profile.social_links.twitter,
+        snapchat: formData.profile.social_links.snapchat,
+        youtube: formData.profile.social_links.youtube,
+        tiktok: formData.profile.social_links.tiktok,
+        linkedin: formData.profile.social_links.linkedin,
+        github: formData.profile.social_links.github,
+        reddit: formData.profile.social_links.reddit,
+        pinterest: formData.profile.social_links.pinterest,
+        reddit: formData.profile.social_links.reddit,
+        discord: formData.profile.social_links.discord,
+        telegram: formData.profile.social_links.telegram,
+        mastodon: formData.profile.social_links.mastodon,
+        whatsapp: formData.profile.social_links.whatsapp,
+      },
+    })
+
+    setUserData(formData)
+    setEditMode(false)
+  }
 
   const handleCancel = () => {
-    setFormData(userData);
-    setEditMode(false);
-  };
+    setFormData(userData)
+    setEditMode(false)
+  }
 
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (editMode && e.key === "Enter") {
-        const activeElement = document.activeElement;
+      if (editMode && e.key === 'Enter') {
+        const activeElement = document.activeElement
         const isInputActive =
-          activeElement.tagName === "INPUT" ||
-          activeElement.tagName === "TEXTAREA" ||
-          activeElement.tagName === "SELECT";
+          activeElement.tagName === 'INPUT' ||
+          activeElement.tagName === 'TEXTAREA' ||
+          activeElement.tagName === 'SELECT'
 
         if (!isInputActive) {
-          handleSave();
+          handleSave()
         }
       }
-    };
+    }
 
     if (editMode) {
-      document.addEventListener("keypress", handleKeyPress);
+      document.addEventListener('keypress', handleKeyPress)
     }
 
     return () => {
-      document.removeEventListener("keypress", handleKeyPress);
-    };
-  }, [editMode]);
+      document.removeEventListener('keypress', handleKeyPress)
+    }
+  }, [editMode])
 
-  if (!userData || !formData) return <div>Loading...</div>;
+  if (!userData || !formData) return <div>Loading...</div>
 
   return (
     <div className="profile-container">
@@ -496,15 +561,20 @@ function Profile() {
           <img
             width="150px"
             height="150px"
-            src={userData.profile.profile_image ?? 'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-profile-picture-business-profile-woman-suitable-social-media-profiles-icons-screensavers-as-templatex9_719432-1339.jpg'}
+            src={
+              userData.profile.profile_image ??
+              'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-profile-picture-business-profile-woman-suitable-social-media-profiles-icons-screensavers-as-templatex9_719432-1339.jpg'
+            }
             alt="profile image"
             className={`profile-image ${
-              editMode ? "profile-image-editable" : ""
+              editMode ? 'profile-image-editable' : ''
             }`}
             onClick={handleImageClick}
           />
           <div className="profile-info">
-            <h2 className="profile-name">{userData.name}</h2>
+            <h2 className="profile-name">
+              {userData.first_name} {userData.last_name}
+            </h2>
             <div className="profile-email">{userData.email}</div>
           </div>
         </div>
@@ -591,7 +661,5 @@ function Profile() {
         </div>
       )}
     </div>
-  );
+  )
 }
-
-export default Profile;
