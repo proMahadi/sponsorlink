@@ -132,6 +132,7 @@ export default function Explore() {
   }, [])
 
   const handleToggleSaveListing = useCallback((listing) => {
+ 
     setSavedListing((prev) => {
       const index = prev.findIndex(
         (saved) => saved.id === listing.id
@@ -209,8 +210,8 @@ export default function Explore() {
         key={`${listing.name}-${index}`}
         listing={listing}
         onToggleSave={handleToggleSaveListing}
-        isSaved={state.savedListings.some(
-          (saved) => saved.name === listing.name
+        isSaved={savedListing.some(
+          (saved) => saved.id === listing.id
         )}
         showApply={true}
         showRemove={false}

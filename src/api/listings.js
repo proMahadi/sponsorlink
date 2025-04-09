@@ -18,7 +18,7 @@ export async function saveListing(id) {
 }
 export async function deleteListing(id) {
   const{data}= await clientAxios.delete("account/delete-saved-listing/",{
-    listing_id:id
+    data:{listing_id:id}
   })
   return data
 }
