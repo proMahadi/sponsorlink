@@ -11,7 +11,7 @@ import { useAuthContext } from '@/context/AuthContext'
 import { isAxiosError } from 'axios'
 
 const LoginSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
+  email: z.string().email().min(1, 'Email is required'),
   password: z.string().min(4, 'password length should be more then 8'),
 })
 
@@ -62,11 +62,11 @@ export default function Login({}) {
 
   //   setIsLoading(false);
   // };
-  const onSubmit = async ({ username, password }) => {
+  const onSubmit = async ({ email, password }) => {
     if (isLoading) return
 
     try {
-      const data = await login(username, password)
+      const data = await login(email, password)
       setAuth(data.user_info, data.profile, data.access, data.refresh)
 
       navigate('/')
@@ -115,16 +115,16 @@ export default function Login({}) {
                 // onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
                 width={'100%'}
-                {...register('username')}
+                {...register('email')}
               />
-              {errors.username && (
+              {errors.email && (
                 <p
                   style={{
                     color: 'red',
                     fontSize: '12px',
                   }}
                 >
-                  {errors.username.message}
+                  {errors.email.message}
                 </p>
               )}
             </div>

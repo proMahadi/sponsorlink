@@ -60,13 +60,13 @@ export default function UserMenu() {
     }
   }, [])
 
-  const { user, logout } = useAuthContext()
+  const { user, logout, profile } = useAuthContext()
 
   return (
     <div className="profile-icon-container">
       <div className="profile" ref={profileRef} onClick={toggleMenu}>
         <img
-          src={user.profileImage ?? '/default_profile_image.jpg'}
+          src={profile.profile_image ?? '/default_profile_image.jpg'}
           className="profile-image"
         />
       </div>

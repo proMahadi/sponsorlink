@@ -10,10 +10,11 @@ import {
   Edit,
 } from '@geist-ui/icons'
 import { industryChoices, countryChoices, tagChoices } from '@/utils/constants'
-import { getCurrentUser } from '@/api/user'
+import { getCurrentUser, updateProfile, updateProfileImage } from '@/api/user'
 import { getIndustry } from '@/api/industry.js'
 import { getTags } from '@/api/tags.js'
 import clientAxios from '@/api/axios'
+import { useAuthContext } from '@/context/AuthContext'
 
 const INITIAL_DATA = {
   name: '',
@@ -368,11 +369,9 @@ export default function Profile() {
   const [formData, setFormData] = useState(null)
   const [editMode, setEditMode] = useState(false)
   const [imageModalVisible, setImageModalVisible] = useState(false)
-  const [tempImageUrl, setTempImageUrl] = useState('')
+  const [tempImageFile, setTempImageFile] = useState()
   const [industries, setIndustries] = useState([])
   const [tags, setTags] = useState([])
-
-  console.log(formData, userData)
 
   useEffect(() => {
     getIndustry().then((data) => {
@@ -402,22 +401,30 @@ export default function Profile() {
     console.log(userData, 'userData')
   }, [])
 
-  console.log(userData)
-
   const handleImageClick = () => {
-    setEditMode(true)
-    setTempImageUrl(formData.profile_image)
-    setImageModalVisible(true)
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+
+    input.onchange = (e) => {
+      const file = e.target.files[0]
+      if (file) {
+        setEditMode(true)
+        setTempImageFile(file)
+      }
+    }
+
+    input.click()
   }
 
-  const handleImageSubmit = () => {
+  /*   const handleImageSubmit = () => {
     setFormData((prev) => ({
       ...prev,
-      profile_image: tempImageUrl,
+      profile_image: tempImageFile,
     }))
     setUserData((prev) => ({
       ...prev,
-      profile_image: tempImageUrl,
+      profile_image: tempImageFile,
     }))
 
     const currentData = JSON.parse(sessionStorage.getItem('user'))
@@ -425,13 +432,13 @@ export default function Profile() {
       'user',
       JSON.stringify({
         ...currentData,
-        profile_image: tempImageUrl,
+        profile_image: tempImageFile,
       })
     )
 
     setImageModalVisible(false)
     setEditMode(false)
-  }
+  } */
 
   const handleInputChange = (e) => {
     const { name, value } = e.target // Here the name can be like "profile.phone..." or "first_name"
@@ -480,13 +487,12 @@ export default function Profile() {
   const handleSave = async () => {
     // sessionStorage.setItem('user', JSON.stringify(formData))
 
-    await clientAxios.patch('/account/update-profile/', {
-      user: {
+    await updateProfile(
+      {
         first_name: formData.first_name,
         last_name: formData.last_name,
       },
-
-      profile: {
+      {
         bio: formData.profile.bio,
         age: formData.profile.age,
         phone: formData.profile.phone,
@@ -515,8 +521,12 @@ export default function Profile() {
         telegram: formData.profile.social_links.telegram,
         mastodon: formData.profile.social_links.mastodon,
         whatsapp: formData.profile.social_links.whatsapp,
-      },
-    })
+      }
+    )
+
+    if (tempImageFile instanceof File) {
+      await updateProfileImage(tempImageFile)
+    }
 
     setUserData(formData)
     setEditMode(false)
@@ -562,7 +572,12 @@ export default function Profile() {
             width="150px"
             height="150px"
             src={
-              userData.profile.profile_image ??
+              (tempImageFile
+                ? URL.createObjectURL(tempImageFile)
+                : undefined) ??
+              (userData.profile.profile_image.startsWith('http')
+                ? userData.profile.profile_image
+                : `https://api.trupersona.mohuls.com${userData.profile.profile_image}`) ??
               'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-profile-picture-business-profile-woman-suitable-social-media-profiles-icons-screensavers-as-templatex9_719432-1339.jpg'
             }
             alt="profile image"
@@ -633,14 +648,14 @@ export default function Profile() {
         </ProfileSection>
       </div>
 
-      {imageModalVisible && (
+      {/* {imageModalVisible && (
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>Update Profile Image</h3>
             <Input
               placeholder="Enter image URL"
-              value={tempImageUrl}
-              onChange={(e) => setTempImageUrl(e.target.value)}
+              value={tempImageFile}
+              onChange={(e) => setTempImageFile(e.target.value)}
               width="100%"
             />
             <div className="modal-buttons">
@@ -659,7 +674,7 @@ export default function Profile() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

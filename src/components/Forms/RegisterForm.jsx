@@ -24,7 +24,6 @@ import { useFieldArray, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
-
 // google maps imports & variables
 import {
   GoogleMap,
@@ -37,7 +36,7 @@ import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
 } from 'use-places-autocomplete'
-import {getCurrentUser, updateProfile} from '@/api/user'
+import { getCurrentUser, updateProfile, updateProfileImage } from '@/api/user'
 import { useNavigate } from 'react-router-dom'
 import { useAuthContext } from '@/context/AuthContext'
 import { getIndustry } from '@/api/industry'
@@ -170,7 +169,7 @@ export default function RegiserForm({ User, setUser }) {
   const [currentStep, setCurrentStep] = useState('personal') // 'personal' or 'profile'
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [tempImageUrl, setTempImageUrl] = useState('')
-  const [previewImageUrl, setPreviewImageUrl] = useState('');
+  const [previewImageUrl, setPreviewImageUrl] = useState('')
 
   // google maps states hooks and functions
   const { isLoaded, loadError } = useLoadScript({
@@ -275,18 +274,18 @@ export default function RegiserForm({ User, setUser }) {
   useEffect(() => {
     if (markers.length > 0) {
       fetchGeocodeResults().then(() => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           address: selectedLocation.address,
           city: selectedLocation.city,
           postcode: selectedLocation.postal_code,
           country: selectedLocation.country,
           latitude: markers[0].lat,
-          longitude: markers[0].lng
-        }));
-      });
+          longitude: markers[0].lng,
+        }))
+      })
     }
-  }, [markers]);
+  }, [markers])
 
   const onMapClick = useCallback((e) => {
     // console.log(e.latLng.lat(), 'latitude')
@@ -447,9 +446,13 @@ export default function RegiserForm({ User, setUser }) {
           latitude: formData.latitude,
           longitude: formData.longitude,
         },
-        formData.industry?  Number(formData.industry):undefined,
+        formData.industry ? Number(formData.industry) : undefined,
         formData.tags.map(Number)
       )
+
+      if (formData.profile_image instanceof File) {
+        await updateProfileImage(formData.profile_image)
+      }
 
       setProfile((prev) => ({ ...prev, is_first_time: false }))
       return navigate('/explore')
@@ -458,9 +461,9 @@ export default function RegiserForm({ User, setUser }) {
     }
 
     // alert("boom")
-    console.log(formData,"formData")
-    console.log(selectedLocation,"address")
-    console.log(markers[0],"markers")
+    console.log(formData, 'formData')
+    console.log(selectedLocation, 'address')
+    console.log(markers[0], 'markers')
 
     // Get location data before saving
     // const { address, postcode, city, country } = formData;
@@ -534,23 +537,22 @@ export default function RegiserForm({ User, setUser }) {
   }
 
   const handleOpportunityToggle = (event) => {
-    const newValue = event.target.checked;
+    const newValue = event.target.checked
     console.log(newValue, 'opportunity')
-    handleInputChange('opportunities', newValue);
-  };
+    handleInputChange('opportunities', newValue)
+  }
 
   const handleImageUpload = (event) => {
-    const file = event.target.files?.[0];
+    const file = event.target.files?.[0]
     if (!file) {
-      console.warn("No file selected");
-      return;
+      console.warn('No file selected')
+      return
     }
 
-    const imageUrl = URL.createObjectURL(file);
+    const imageUrl = URL.createObjectURL(file)
     setPreviewImageUrl(imageUrl)
     formData.profile_image = file
-  };
-
+  }
 
   if (loadError) return 'Error'
   if (!isLoaded) return 'Loading...'
@@ -617,8 +619,8 @@ export default function RegiserForm({ User, setUser }) {
           >
             <Input
               width="100%"
-                value={formData.first_name}
-                onChange={(e) => handleInputChange("first_name", e.target.value)}
+              value={formData.first_name}
+              onChange={(e) => handleInputChange('first_name', e.target.value)}
               placeholder="John"
               // {...register('first_name')}
             >
@@ -642,8 +644,8 @@ export default function RegiserForm({ User, setUser }) {
           >
             <Input
               width="100%"
-                value={formData.surname}
-                onChange={(e) => handleInputChange("surname", e.target.value)}
+              value={formData.surname}
+              onChange={(e) => handleInputChange('surname', e.target.value)}
               placeholder="Smith"
               // {...register('last_name')}
             >
@@ -671,8 +673,8 @@ export default function RegiserForm({ User, setUser }) {
           >
             <Input
               width="100%"
-                value={formData.username}
-                onChange={(e) => handleInputChange("username", e.target.value)}
+              value={formData.username}
+              onChange={(e) => handleInputChange('username', e.target.value)}
               placeholder="johnsmith1988"
               // {...register('username')}
             >
@@ -697,8 +699,8 @@ export default function RegiserForm({ User, setUser }) {
             <Input
               width="100%"
               icon={<Phone />}
-                value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
+              value={formData.phone}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
               placeholder="+44 123 456 7890"
               // {...register('phone')}
             >
@@ -868,8 +870,8 @@ export default function RegiserForm({ User, setUser }) {
           <Select
             width="98.6%"
             placeholder="Select User Type"
-              value={formData.user_type}
-              onChange={(val) => handleInputChange("user_type", val)}
+            value={formData.user_type}
+            onChange={(val) => handleInputChange('user_type', val)}
             // {...register('user_type')}
           >
             <Select.Option value="individual">Individual</Select.Option>
@@ -892,8 +894,8 @@ export default function RegiserForm({ User, setUser }) {
           <Select
             width="98.6%"
             placeholder="Select Industry"
-              value={formData.industry}
-              onChange={(val) => handleInputChange("industry", val)}
+            value={formData.industry}
+            onChange={(val) => handleInputChange('industry', val)}
             // {...register('industryChoices')}
           >
             {industries.map((choice) => (
@@ -912,8 +914,8 @@ export default function RegiserForm({ User, setUser }) {
           <Select
             width="98.6%"
             placeholder="Select Tags"
-              value={formData.tags}
-              onChange={(val) => handleInputChange("tags", val)}
+            value={formData.tags}
+            onChange={(val) => handleInputChange('tags', val)}
             multiple
             scale={0.9}
             // {...register('tags')}
@@ -946,8 +948,8 @@ export default function RegiserForm({ User, setUser }) {
         <label>Bio</label>
         <Textarea
           width="100%"
-            value={formData.bio}
-            onChange={(e) => handleInputChange("bio", e.target.value)}
+          value={formData.bio}
+          onChange={(e) => handleInputChange('bio', e.target.value)}
           placeholder="Enter Bio"
           // {...register('bio')}
         />
@@ -966,7 +968,7 @@ export default function RegiserForm({ User, setUser }) {
             width="100%"
             icon={<Linkedin />}
             value={formData.linkedin}
-            onChange={(e) => handleInputChange("linkedin", e.target.value)}
+            onChange={(e) => handleInputChange('linkedin', e.target.value)}
             placeholder="LinkedIn URL"
             // {...register('linkedin')}
           >
@@ -988,7 +990,7 @@ export default function RegiserForm({ User, setUser }) {
             width="100%"
             icon={<Github />}
             value={formData.github}
-            onChange={(e) => handleInputChange("github", e.target.value)}
+            onChange={(e) => handleInputChange('github', e.target.value)}
             placeholder="GitHub URL"
             // {...register('facebook')}
           >
@@ -1010,7 +1012,7 @@ export default function RegiserForm({ User, setUser }) {
             width="100%"
             icon={<Twitter />}
             value={formData.twitter}
-            onChange={(e) => handleInputChange("twitter", e.target.value)}
+            onChange={(e) => handleInputChange('twitter', e.target.value)}
             placeholder="Twitter URL"
             // {...register('twitter')}
           >
@@ -1032,7 +1034,7 @@ export default function RegiserForm({ User, setUser }) {
             width="100%"
             icon={<ExternalLink />}
             value={formData.instagram}
-            onChange={(e) => handleInputChange("instagram", e.target.value)}
+            onChange={(e) => handleInputChange('instagram', e.target.value)}
             placeholder="Instagram URL"
             // {...register('instagram')}
           >
@@ -1054,7 +1056,7 @@ export default function RegiserForm({ User, setUser }) {
             width="100%"
             icon={<ExternalLink />}
             value={formData.youtube}
-            onChange={(e) => handleInputChange("youtube", e.target.value)}
+            onChange={(e) => handleInputChange('youtube', e.target.value)}
             placeholder="YouTube URL"
             // {...register('youtube')}
           >
@@ -1076,7 +1078,7 @@ export default function RegiserForm({ User, setUser }) {
             width="100%"
             icon={<ExternalLink />}
             value={formData.tiktok}
-            onChange={(e) => handleInputChange("tiktok", e.target.value)}
+            onChange={(e) => handleInputChange('tiktok', e.target.value)}
             placeholder="TikTok URL"
             // {...register('tiktok')}
           >
