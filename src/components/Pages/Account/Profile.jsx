@@ -373,6 +373,8 @@ export default function Profile() {
   const [industries, setIndustries] = useState([])
   const [tags, setTags] = useState([])
 
+  const { refresh } = useAuthContext()
+
   useEffect(() => {
     getIndustry().then((data) => {
       setIndustries(data)
@@ -528,6 +530,7 @@ export default function Profile() {
       await updateProfileImage(tempImageFile)
     }
 
+    await refresh()
     setUserData(formData)
     setEditMode(false)
   }
@@ -575,9 +578,10 @@ export default function Profile() {
               (tempImageFile
                 ? URL.createObjectURL(tempImageFile)
                 : undefined) ??
-              (userData.profile.profile_image.startsWith('http')
-                ? userData.profile.profile_image
-                : `https://api.trupersona.mohuls.com${userData.profile.profile_image}`) ??
+              (userData.profile?.profile_image &&
+                (userData.profile?.profile_image?.startsWith?.('http')
+                  ? userData.profile.profile_image
+                  : `https://api.trupersona.mohuls.com${userData.profile.profile_image}`)) ??
               'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-profile-picture-business-profile-woman-suitable-social-media-profiles-icons-screensavers-as-templatex9_719432-1339.jpg'
             }
             alt="profile image"

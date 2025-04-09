@@ -9,6 +9,7 @@ export const AuthContext = createContext({
   refreshToken: '',
   isAuthenticated: false,
   logout: () => {},
+  refresh: () => {},
   setUser: (user) => {},
   setProfile: (profile) => {},
   setToken: (accessToken, refreshToken) => {},
@@ -39,13 +40,18 @@ export function AuthContextProvider({ children }) {
     ] = `Bearer ${accessToken}`
   }
 
+  async function refreshAuth() {
+    const { access, user_info, profile, refresh } = await refetchToken(
+      refreshToken
+    )
+
+    setAuth(user_info, profile, access, refresh)
+  }
+
   useEffect(() => {
     if (refreshToken && !accessToken) {
       setIsLoading(true)
-      refetchToken(refreshToken)
-        .then(({ access, user_info, profile, refresh }) => {
-          setAuth(user_info, profile, access, refresh)
-        })
+      refreshAuth()
         .catch(() => {})
         .finally(() => setIsLoading(false))
     }
@@ -71,6 +77,7 @@ export function AuthContextProvider({ children }) {
         setUser,
         setProfile,
         setAuth,
+        refresh: refreshAuth,
       }}
     >
       {isLoading ? (
