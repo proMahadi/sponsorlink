@@ -491,13 +491,13 @@ export default function Profile() {
 
     await updateProfile(
       {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
+        first_name: formData.first_name || null,
+        last_name: formData.last_name || null,
       },
       {
-        bio: formData.profile.bio,
-        age: formData.profile.age,
-        phone: formData.profile.phone,
+        bio: formData.profile.bio || null,
+        age: formData.profile.age || null,
+        phone: formData.profile.phone || null,
         location: formData.profile.location,
         birth_date: formData.profile.birth_date,
         gender: formData.profile.gender,

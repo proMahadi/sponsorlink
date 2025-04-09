@@ -35,7 +35,7 @@ const formatListingsData = (data) => {
 
 export default function Explore() {
   const navigate = useNavigate()
-  const{savedListing,setSavedListing}=useSavedListingContext()
+  const { savedListing, toggleSavedListing } = useSavedListingContext()
   const [state, setState] = useState({
     listings: [],
     isLoading: false,
@@ -131,27 +131,10 @@ export default function Explore() {
     }
   }, [])
 
-  const handleToggleSaveListing = useCallback((listing) => {
- 
-    setSavedListing((prev) => {
-      const index = prev.findIndex(
-        (saved) => saved.id === listing.id
-      )
-      const updatedSavedListings =
-        index === -1
-          ? [...prev, listing]
-          : prev.filter((_, i) => i !== index)
-
-          if(index===-1){
-            saveListing(listing.id)
-          }else{
-            deleteListing(listing.id)
-          }
-
-
-      return updatedSavedListings 
-    })
-  }, [])
+  const handleToggleSaveListing = useCallback(
+    (listing) => toggleSavedListing(listing),
+    [savedListing]
+  )
 
   const handleShowDetails = useCallback(
     (listing) => {
@@ -210,9 +193,7 @@ export default function Explore() {
         key={`${listing.name}-${index}`}
         listing={listing}
         onToggleSave={handleToggleSaveListing}
-        isSaved={savedListing.some(
-          (saved) => saved.id === listing.id
-        )}
+        isSaved={savedListing.some((saved) => saved.id === listing.id)}
         showApply={true}
         showRemove={false}
         applications={state.applications}
