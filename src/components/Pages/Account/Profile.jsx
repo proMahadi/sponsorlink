@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Divider, Input, Select, Toggle, Textarea } from '@geist-ui/core'
+import React, { useState, useEffect } from "react";
+import { Divider, Input, Select, Toggle, Textarea } from "@geist-ui/core";
 import {
   Mail,
   Phone,
@@ -8,42 +8,42 @@ import {
   Github,
   Linkedin,
   Edit,
-} from '@geist-ui/icons'
-import { industryChoices, countryChoices, tagChoices } from '@/utils/constants'
-import { getCurrentUser, updateProfile, updateProfileImage } from '@/api/user'
-import { getIndustry } from '@/api/industry.js'
-import { getTags } from '@/api/tags.js'
-import clientAxios from '@/api/axios'
-import { useAuthContext } from '@/context/AuthContext'
+} from "@geist-ui/icons";
+import { industryChoices, countryChoices, tagChoices } from "@/utils/constants";
+import { getCurrentUser, updateProfile, updateProfileImage } from "@/api/user";
+import { getIndustry } from "@/api/industry.js";
+import { getTags } from "@/api/tags.js";
+import clientAxios from "@/api/axios";
+import { useAuthContext } from "@/context/AuthContext";
 
 const INITIAL_DATA = {
-  name: '',
-  first_name: '',
-  last_name: '',
-  email: '',
-  industries: [],
-  username: '',
+  name: "" ,
+  first_name: "" ,
+  last_name: "" ,
+  email: "" ,
+  industries: [] ,
+  username: "" ,
   profile: {
-    phone: '',
-    profile_image: '',
-    country: '',
-    address: '',
-    postcode: '',
-    city: '',
-    opportunities: false,
-    bio: '',
-    user_type: '',
+    phone: "" ,
+    profile_image: "" ,
+    country: "" ,
+    address: "" ,
+    postcode: "" ,
+    city: "" ,
+    opportunities: false ,
+    bio: "" ,
+    user_type: "" ,
     social_links: {
-      linkedin: '',
-      github: '',
-      twitter: '',
-      instagram: '',
-      youtube: '',
-      tiktok: '',
+      linkedin: "" ,
+      github: "" ,
+      twitter: "" ,
+      instagram: "" ,
+      youtube: "" ,
+      tiktok: "" ,
     },
   },
   tags: [],
-}
+};
 
 const ProfileSection = ({ title, subtitle, children }) => {
   return (
@@ -56,8 +56,8 @@ const ProfileSection = ({ title, subtitle, children }) => {
         <div className="card-content">{children}</div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const PersonalInfoForm = ({
   formData,
@@ -168,8 +168,8 @@ const PersonalInfoForm = ({
       {/*  </div>*/}
       {/*</div>*/}
     </>
-  )
-}
+  );
+};
 
 const ProfileInfoForm = ({
   formData,
@@ -179,7 +179,7 @@ const ProfileInfoForm = ({
   onInputChange,
   onSelectChange,
 }) => {
-  const bioCharCount = 300 - (formData.profile.bio?.length || 0)
+  const bioCharCount = 300 - (formData.profile.bio?.length || 0);
 
   return (
     <>
@@ -188,7 +188,7 @@ const ProfileInfoForm = ({
           <Toggle
             checked={formData.profile.opportunities}
             onChange={(e) =>
-              onSelectChange(e.target.checked, 'profile.opportunities')
+              onSelectChange(e.target.checked, "profile.opportunities")
             }
             disabled={!editMode}
             color="green"
@@ -214,28 +214,28 @@ const ProfileInfoForm = ({
       </div>
 
       <div className="card-row">
-        <div style={{ width: '100%' }}>
+        <div style={{ width: "100%" }}>
           <div className="select-label">Bio</div>
           <Textarea
             name="profile.bio"
             value={formData.profile.bio}
-            onChange={(e) => onSelectChange(e.target.value, 'profile.bio')}
+            onChange={(e) => onSelectChange(e.target.value, "profile.bio")}
             placeholder="Bio"
             width="100%"
             readOnly={!editMode}
             maxLength={300}
-            style={{ minHeight: '125px' }}
+            style={{ minHeight: "125px" }}
           />
           <div className="bio-char-counter">{bioCharCount} characters left</div>
         </div>
       </div>
 
       <div className="card-row">
-        <div className="card-select" style={{ width: '50%' }}>
+        <div className="card-select" style={{ width: "50%" }}>
           <div className="select-label">User Type</div>
           <Select
             value={formData.profile.user_type}
-            onChange={(val) => onSelectChange(val, 'profile.user_type')}
+            onChange={(val) => onSelectChange(val, "profile.user_type")}
             placeholder="Select user type"
             width="100%"
             disabled={!editMode}
@@ -246,11 +246,11 @@ const ProfileInfoForm = ({
           </Select>
         </div>
 
-        <div className="card-select" style={{ width: '50%' }}>
+        <div className="card-select" style={{ width: "50%" }}>
           <div className="select-label">Industry</div>
           <Select
             value={String(formData.industries[0]?.id)}
-            onChange={(val) => onSelectChange(val, 'industries')}
+            onChange={(val) => onSelectChange(val, "industries")}
             placeholder="Select industry"
             width="100%"
             disabled={!editMode}
@@ -337,13 +337,13 @@ const ProfileInfoForm = ({
       </div>
 
       <div className="card-row">
-        <div style={{ width: '100%' }}>
+        <div style={{ width: "100%" }}>
           <div className="select-label">Tags</div>
-          <div style={{ display: 'flex', gap: '20px' }}>
+          <div style={{ display: "flex", gap: "20px" }}>
             <Select
               multiple
               value={formData.tags.map((tag) => String(tag?.id))}
-              onChange={(val) => onSelectChange(val, 'tags')}
+              onChange={(val) => onSelectChange(val, "tags")}
               placeholder="Select tags"
               width="100%"
               disabled={!editMode}
@@ -361,63 +361,63 @@ const ProfileInfoForm = ({
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
 export default function Profile() {
-  const [userData, setUserData] = useState(null)
-  const [formData, setFormData] = useState(null)
-  const [editMode, setEditMode] = useState(false)
-  const [imageModalVisible, setImageModalVisible] = useState(false)
-  const [tempImageFile, setTempImageFile] = useState()
-  const [industries, setIndustries] = useState([])
-  const [tags, setTags] = useState([])
+  const [userData, setUserData] = useState(null);
+  const [formData, setFormData] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+  const [tempImageFile, setTempImageFile] = useState();
+  const [industries, setIndustries] = useState([]);
+  const [tags, setTags] = useState([]);
 
-  const { refresh } = useAuthContext()
+  const { refresh } = useAuthContext();
 
   useEffect(() => {
     getIndustry().then((data) => {
-      setIndustries(data)
-    })
+      setIndustries(data);
+    });
 
     getTags().then((data) => {
-      setTags(data)
-    })
-  }, [])
+      setTags(data);
+    });
+  }, []);
 
   useEffect(() => {
-    const cachedData = sessionStorage.getItem('user')
-    const initialData = cachedData ? JSON.parse(cachedData) : INITIAL_DATA
+    const cachedData = sessionStorage.getItem("user");
+    const initialData = cachedData ? JSON.parse(cachedData) : INITIAL_DATA;
 
     initialData.name = `${initialData.first_name}${
-      initialData.surname ? ' ' + initialData.surname : ''
-    }`
+      initialData.surname ? " " + initialData.surname : ""
+    }`;
     const fetchCurrentUser = async () => {
-      const currentUser = await getCurrentUser()
+      const currentUser = await getCurrentUser();
       try {
-        setUserData(currentUser)
-        setFormData(currentUser)
+        setUserData(currentUser);
+        setFormData(currentUser);
       } catch (error) {}
-    }
-    fetchCurrentUser()
-    console.log(userData, 'userData')
-  }, [])
+    };
+    fetchCurrentUser();
+    console.log(userData, "userData");
+  }, []);
 
   const handleImageClick = () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = 'image/*'
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
 
     input.onchange = (e) => {
-      const file = e.target.files[0]
+      const file = e.target.files[0];
       if (file) {
-        setEditMode(true)
-        setTempImageFile(file)
+        setEditMode(true);
+        setTempImageFile(file);
       }
-    }
+    };
 
-    input.click()
-  }
+    input.click();
+  };
 
   /*   const handleImageSubmit = () => {
     setFormData((prev) => ({
@@ -443,48 +443,48 @@ export default function Profile() {
   } */
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target // Here the name can be like "profile.phone..." or "first_name"
-    const keys = name.split('.')
+    const { name, value } = e.target; // Here the name can be like "profile.phone..." or "first_name"
+    const keys = name.split(".");
 
     setFormData((prev) => {
-      const clonedData = structuredClone(prev)
+      const clonedData = structuredClone(prev);
 
-      if (name === 'first_name' || name === 'last_name') {
+      if (name === "first_name" || name === "last_name") {
         clonedData.name = [clonedData.first_name, clonedData.last_name]
           .filter(Boolean)
-          .join(' ')
+          .join(" ");
       }
 
-      let current = clonedData
+      let current = clonedData;
       for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]]) {
-          current[keys[i]] = {}
+          current[keys[i]] = {};
         }
-        current = current[keys[i]]
+        current = current[keys[i]];
       }
 
-      current[keys[keys.length - 1]] = value
-      return clonedData
-    })
-  }
+      current[keys[keys.length - 1]] = value;
+      return clonedData;
+    });
+  };
 
   const handleSelectChange = (value, field) => {
     setFormData((prev) => {
-      const clonedData = structuredClone(prev)
-      const keys = field.split('.')
+      const clonedData = structuredClone(prev);
+      const keys = field.split(".");
 
-      let current = clonedData
+      let current = clonedData;
       for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]]) {
-          current[keys[i]] = {}
+          current[keys[i]] = {};
         }
-        current = current[keys[i]]
+        current = current[keys[i]];
       }
 
-      current[keys[keys.length - 1]] = value
-      return clonedData
-    })
-  }
+      current[keys[keys.length - 1]] = value;
+      return clonedData;
+    });
+  };
 
   const handleSave = async () => {
     // sessionStorage.setItem('user', JSON.stringify(formData))
@@ -498,73 +498,73 @@ export default function Profile() {
         bio: formData.profile.bio || null,
         age: formData.profile.age || null,
         phone: formData.profile.phone || null,
-        location: formData.profile.location,
-        birth_date: formData.profile.birth_date,
-        gender: formData.profile.gender,
-        opportunities: formData.profile.opportunities,
-        latitude: formData.profile.latitude,
-        longitude: formData.profile.longitude,
-        country: formData.profile.country,
-        city: formData.profile.city,
-        address: formData.profile.address,
+        location: formData.profile.location || null,
+        birth_date: formData.profile.birth_date || null,
+        gender: formData.profile.gender || null,
+        opportunities: formData.profile.opportunities || null,
+        latitude: formData.profile.latitude || null,
+        longitude: formData.profile.longitude || null,
+        country: formData.profile.country || null,
+        city: formData.profile.city || null,
+        address: formData.profile.address || null,
 
-        facebook: formData.profile.social_links.facebook,
-        instagram: formData.profile.social_links.instagram,
-        twitter: formData.profile.social_links.twitter,
-        snapchat: formData.profile.social_links.snapchat,
-        youtube: formData.profile.social_links.youtube,
-        tiktok: formData.profile.social_links.tiktok,
-        linkedin: formData.profile.social_links.linkedin,
-        github: formData.profile.social_links.github,
-        reddit: formData.profile.social_links.reddit,
-        pinterest: formData.profile.social_links.pinterest,
-        reddit: formData.profile.social_links.reddit,
-        discord: formData.profile.social_links.discord,
-        telegram: formData.profile.social_links.telegram,
-        mastodon: formData.profile.social_links.mastodon,
-        whatsapp: formData.profile.social_links.whatsapp,
+        facebook: formData.profile.social_links.facebook || null,
+        instagram: formData.profile.social_links.instagram || null,
+        twitter: formData.profile.social_links.twitter || null,
+        snapchat: formData.profile.social_links.snapchat || null,
+        youtube: formData.profile.social_links.youtube || null,
+        tiktok: formData.profile.social_links.tiktok || null,
+        linkedin: formData.profile.social_links.linkedin || null,
+        github: formData.profile.social_links.github || null,
+        reddit: formData.profile.social_links.reddit || null,
+        pinterest: formData.profile.social_links.pinterest || null,
+        reddit: formData.profile.social_links.reddit || null,
+        discord: formData.profile.social_links.discord || null,
+        telegram: formData.profile.social_links.telegram || null,
+        mastodon: formData.profile.social_links.mastodon || null,
+        whatsapp: formData.profile.social_links.whatsapp || null,
       }
-    )
+    );
 
     if (tempImageFile instanceof File) {
-      await updateProfileImage(tempImageFile)
+      await updateProfileImage(tempImageFile);
     }
 
-    await refresh()
-    setUserData(formData)
-    setEditMode(false)
-  }
+    await refresh();
+    setUserData(formData);
+    setEditMode(false);
+  };
 
   const handleCancel = () => {
-    setFormData(userData)
-    setEditMode(false)
-  }
+    setFormData(userData);
+    setEditMode(false);
+  };
 
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (editMode && e.key === 'Enter') {
-        const activeElement = document.activeElement
+      if (editMode && e.key === "Enter") {
+        const activeElement = document.activeElement;
         const isInputActive =
-          activeElement.tagName === 'INPUT' ||
-          activeElement.tagName === 'TEXTAREA' ||
-          activeElement.tagName === 'SELECT'
+          activeElement.tagName === "INPUT" ||
+          activeElement.tagName === "TEXTAREA" ||
+          activeElement.tagName === "SELECT";
 
         if (!isInputActive) {
-          handleSave()
+          handleSave();
         }
       }
-    }
+    };
 
     if (editMode) {
-      document.addEventListener('keypress', handleKeyPress)
+      document.addEventListener("keypress", handleKeyPress);
     }
 
     return () => {
-      document.removeEventListener('keypress', handleKeyPress)
-    }
-  }, [editMode])
+      document.removeEventListener("keypress", handleKeyPress);
+    };
+  }, [editMode]);
 
-  if (!userData || !formData) return <div>Loading...</div>
+  if (!userData || !formData) return <div>Loading...</div>;
 
   return (
     <div className="profile-container">
@@ -579,14 +579,14 @@ export default function Profile() {
                 ? URL.createObjectURL(tempImageFile)
                 : undefined) ??
               (userData.profile?.profile_image &&
-                (userData.profile?.profile_image?.startsWith?.('http')
+                (userData.profile?.profile_image?.startsWith?.("http")
                   ? userData.profile.profile_image
                   : `https://api.trupersona.mohuls.com${userData.profile.profile_image}`)) ??
-              'https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-profile-picture-business-profile-woman-suitable-social-media-profiles-icons-screensavers-as-templatex9_719432-1339.jpg'
+              "https://img.freepik.com/premium-vector/vector-flat-illustration-grayscale-avatar-user-profile-person-icon-profile-picture-business-profile-woman-suitable-social-media-profiles-icons-screensavers-as-templatex9_719432-1339.jpg"
             }
             alt="profile image"
             className={`profile-image ${
-              editMode ? 'profile-image-editable' : ''
+              editMode ? "profile-image-editable" : ""
             }`}
             onClick={handleImageClick}
           />
@@ -680,5 +680,5 @@ export default function Profile() {
         </div>
       )} */}
     </div>
-  )
+  );
 }
