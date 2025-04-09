@@ -1,18 +1,21 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from '@/App.jsx'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "@/App.jsx";
 
-import { GeistProvider } from '@geist-ui/core'
-import { AuthContextProvider } from './context/AuthContext'
+import { GeistProvider } from "@geist-ui/core";
+import { AuthContextProvider } from "./context/AuthContext";
+import { SavedListingContextProvider } from "./context/SavedListingContext";
 
-window.stickySidebar = true
+window.stickySidebar = true;
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <GeistProvider>
       <AuthContextProvider>
-        <App />
+        <SavedListingContextProvider>
+          <App />
+        </SavedListingContextProvider>
       </AuthContextProvider>
     </GeistProvider>
   </React.StrictMode>
-)
+);

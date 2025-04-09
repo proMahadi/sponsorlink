@@ -10,7 +10,8 @@ import { Grid, List, Plus } from '@geist-ui/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import Footer from '@/components/Footer/Footer'
 import ExploreForm from '@/components/Forms/ExploreForm'
-import { getListings } from '@/api/listings'
+import { deleteListing, getListings, saveListing } from '@/api/listings'
+import { useSavedListingContext } from '@/context/SavedListingContext'
 
 const API_URL =
   'https://sponsorlink-backend.up.railway.app/api/bayes/getOrderedUsers/'
@@ -34,6 +35,7 @@ const formatListingsData = (data) => {
 
 export default function Explore() {
   const navigate = useNavigate()
+  const{savedListing,setSavedListing}=useSavedListingContext()
   const [state, setState] = useState({
     listings: [],
     isLoading: false,
@@ -130,20 +132,24 @@ export default function Explore() {
   }, [])
 
   const handleToggleSaveListing = useCallback((listing) => {
-    setState((prev) => {
-      const index = prev.savedListings.findIndex(
-        (saved) => saved.name === listing.name
+ 
+    setSavedListing((prev) => {
+      const index = prev.findIndex(
+        (saved) => saved.id === listing.id
       )
       const updatedSavedListings =
         index === -1
-          ? [...prev.savedListings, listing]
-          : prev.savedListings.filter((_, i) => i !== index)
+          ? [...prev, listing]
+          : prev.filter((_, i) => i !== index)
 
-      localStorage.setItem(
-        'savedListings',
-        JSON.stringify(updatedSavedListings)
-      )
-      return { ...prev, savedListings: updatedSavedListings }
+          if(index===-1){
+            saveListing(listing.id)
+          }else{
+            deleteListing(listing.id)
+          }
+
+
+      return updatedSavedListings 
     })
   }, [])
 
@@ -204,8 +210,8 @@ export default function Explore() {
         key={`${listing.name}-${index}`}
         listing={listing}
         onToggleSave={handleToggleSaveListing}
-        isSaved={state.savedListings.some(
-          (saved) => saved.name === listing.name
+        isSaved={savedListing.some(
+          (saved) => saved.id === listing.id
         )}
         showApply={true}
         showRemove={false}
