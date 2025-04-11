@@ -250,7 +250,7 @@ const ProfileInfoForm = ({
         <div className="card-select" style={{ width: "50%" }}>
           <div className="select-label">Industry</div>
           <Select
-            value={String(formData.industries[0]?.id)}
+            value={formData.industries[0]?.id ? String(formData.industries[0]?.id) : ""}
             onChange={(val) => onSelectChange(val, "industries")}
             placeholder="Select industry"
             width="100%"
@@ -398,6 +398,7 @@ export default function Profile() {
       try {
         setUserData(currentUser);
         setFormData(currentUser);
+        console.log(formData, 'from the profile view')
       } catch (error) {}
     };
     fetchCurrentUser();
@@ -474,6 +475,19 @@ export default function Profile() {
       const clonedData = structuredClone(prev);
       const keys = field.split(".");
 
+      if (field === "industries") {
+        clonedData.industries = value ? [{ id: Number(value) }] : [];
+        return clonedData;
+      }
+
+      if (field === "tags") {
+        clonedData.tags = Array.isArray(value)
+            ? value.map(tagId => ({ id: Number(tagId) }))
+            : [];
+        return clonedData;
+      }
+
+      // Handle other fields as before
       let current = clonedData;
       for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]]) {
@@ -493,9 +507,6 @@ export default function Profile() {
       {
         first_name: formData.first_name || undefined,
         last_name: formData.last_name || undefined,
-        industries: formData.industries
-          ? Number(formData.industries)
-          : undefined,
       },
       {
         bio: formData.profile.bio || undefined,
@@ -526,9 +537,10 @@ export default function Profile() {
         mastodon: formData.profile.social_links.mastodon || undefined,
         whatsapp: formData.profile.social_links.whatsapp || undefined,
       },
-      {
-        user_type: formData.user_type,
-      }
+      formData.industries
+        ? Number(formData.industries[0]?.id)
+        : undefined,
+      formData.tags.map(tag => Number(tag?.id))
     );
 
     if (tempImageFile instanceof File) {

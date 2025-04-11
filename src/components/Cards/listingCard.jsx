@@ -84,9 +84,9 @@ export default function ListingCard({
             </div>
           </div>
           <div className="listing-info">
-            <div className="listing-role">{listing.opportunity_type} fghh</div>
+            <div className="listing-role">{listing.opportunity_type}</div>
             <div className="listing-employment">
-              {listing.industries[0].name}
+              {listing.industries[0]?.name}
             </div>
             <div className="listing-location">
               <MapPin size={14} />

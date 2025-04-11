@@ -32,10 +32,12 @@ export async function refreshToken(token) {
   return data
 }
 
-export async function updateProfile(user, profile) {
+export async function updateProfile(user, profile, industryId, tagIds) {
   await clientAxios.patch('/account/update-profile/', {
     user,
     profile,
+    industries_id: [industryId],
+    tags_id: tagIds
   })
 }
 
