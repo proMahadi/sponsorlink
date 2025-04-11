@@ -446,7 +446,7 @@ export default function RegiserForm({ User, setUser }) {
           latitude: formData.latitude || undefined,
           longitude: formData.longitude || undefined,
         },
-        formData.industry ? Number(formData.industry) : undefined,
+        Number(formData.industry) ?? undefined,
         formData.tags.map(Number)
       )
 
