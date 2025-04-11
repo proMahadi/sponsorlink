@@ -521,6 +521,7 @@ export default function Profile() {
         country: formData.profile.country || undefined,
         city: formData.profile.city || undefined,
         address: formData.profile.address || undefined,
+        user_type: formData.profile.user_type || undefined,
 
         facebook: formData.profile.social_links.facebook || undefined,
         instagram: formData.profile.social_links.instagram || undefined,
